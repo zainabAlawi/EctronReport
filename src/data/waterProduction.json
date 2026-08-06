@@ -1,0 +1,343 @@
+{
+  "dates": {
+    "2026-08-04": {
+      "shift1": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "shift2": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "shift3": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      }
+    },
+    "2026-08-05": {
+      "shift1": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "shift2": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "shift3": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "official": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      }
+    }
+  },
+  "history": [
+    {
+      "id": "1786011970042",
+      "timestamp": "2026-08-06T10:26:10.042Z",
+      "filename": "ProduitsEnCours_2026_08_05_174243_.xls",
+      "date": "2026-08-05",
+      "shift": "official",
+      "summary": {
+        "assembly": 0,
+        "perso": 0,
+        "lasering": 0,
+        "packaging": 0,
+        "cartons": 0,
+        "palets": 0
+      },
+      "rows": [
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "No production line"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "Product",
+          "__EMPTY": "Version",
+          "__EMPTY_1": "Designation",
+          "__EMPTY_2": "Post",
+          "__EMPTY_3": "Transaction",
+          "__EMPTY_4": "Last Movement",
+          "__EMPTY_5": "Quantité OK",
+          "__EMPTY_6": "Quantité KO",
+          "__EMPTY_7": "Quantité TOTALE"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": 254120441,
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "EMBALLAGE_OK - Emballage OK",
+          "__EMPTY_4": "05/08/2026 13:44:44",
+          "__EMPTY_5": 897,
+          "__EMPTY_7": 897
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": 254120441,
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "GO_CARTON - Go Carton",
+          "__EMPTY_4": "05/08/2026 13:44:44",
+          "__EMPTY_5": 897,
+          "__EMPTY_7": 897
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": 254120441,
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "LBL_BOX - Impression étiquette Boite",
+          "__EMPTY_4": "05/08/2026 13:44:44",
+          "__EMPTY_5": 897,
+          "__EMPTY_7": 897
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254120441S",
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "GO_EMBALLAGE - Go Emballage",
+          "__EMPTY_4": "05/08/2026 13:44:44",
+          "__EMPTY_5": 897,
+          "__EMPTY_7": 897
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254120441S",
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00095",
+          "__EMPTY_3": "TEST_LASER - Test Laser",
+          "__EMPTY_4": "05/08/2026 13:44:41",
+          "__EMPTY_5": 900,
+          "__EMPTY_7": 900
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-INMC00017",
+          "__EMPTY_3": "END_MULTITEST - END_MULTITEST",
+          "__EMPTY_4": "05/08/2026 13:44:16",
+          "__EMPTY_5": 1084,
+          "__EMPTY_6": 611,
+          "__EMPTY_7": 1695
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254120441S",
+          "__EMPTY": "A",
+          "__EMPTY_1": "OMAN WM15-L868 PL110 R400 Q2.5 T50",
+          "__EMPTY_2": "BNR-INMC00094",
+          "__EMPTY_3": "TEST_PERSO - TEST_PERSO",
+          "__EMPTY_4": "05/08/2026 13:43:24",
+          "__EMPTY_5": 1028,
+          "__EMPTY_6": 73,
+          "__EMPTY_7": 1101
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-INMC00017",
+          "__EMPTY_3": "LOT_METRO_AJOUT - Ajout de NS Dans Lot Métro",
+          "__EMPTY_4": "05/08/2026 13:43:00",
+          "__EMPTY_5": 1084,
+          "__EMPTY_7": 1084
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23SUR_OMAN",
+          "__EMPTY_1": "Catron OMAN",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "IMPR_ETI_CARTON - Impression Carton",
+          "__EMPTY_4": "05/08/2026 13:39:15",
+          "__EMPTY_5": 179,
+          "__EMPTY_7": 179
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23SUR_OMAN",
+          "__EMPTY_1": "Catron OMAN",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "FINCARTON - Fin suremballage/mise en carton",
+          "__EMPTY_4": "05/08/2026 13:39:14",
+          "__EMPTY_5": 89,
+          "__EMPTY_7": 89
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-NG5998",
+          "__EMPTY_3": "TEST_CALIBRATION - TEST_CALIBRATION",
+          "__EMPTY_4": "05/08/2026 13:30:12",
+          "__EMPTY_5": 882,
+          "__EMPTY_6": 26,
+          "__EMPTY_7": 908
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23PAL_DINAN",
+          "__EMPTY_1": "Palette generique SAGEM",
+          "__EMPTY_2": "BNR-INMC00042",
+          "__EMPTY_3": "REIMPRESSION_PALETTE - Reimpression Palette",
+          "__EMPTY_4": "05/08/2026 12:08:17",
+          "__EMPTY_5": 1,
+          "__EMPTY_7": 1
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23PAL_DINAN",
+          "__EMPTY_1": "Palette generique SAGEM",
+          "__EMPTY_2": "BNR-INMC00097",
+          "__EMPTY_3": "FINPALET - Fin palette",
+          "__EMPTY_4": "05/08/2026 11:30:42",
+          "__EMPTY_5": 1,
+          "__EMPTY_7": 1
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23PAL_DINAN",
+          "__EMPTY_1": "Palette generique SAGEM",
+          "__EMPTY_2": "BNR-INMC00097",
+          "__EMPTY_3": "IMPR_PALET - Impression Palet",
+          "__EMPTY_4": "05/08/2026 11:30:42",
+          "__EMPTY_5": 1,
+          "__EMPTY_7": 1
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23SUR_OMAN",
+          "__EMPTY_1": "Catron OMAN",
+          "__EMPTY_2": "BNR-INMC00097",
+          "__EMPTY_3": "PALETTISATION_OK - Palettisation Ok",
+          "__EMPTY_4": "05/08/2026 11:30:42",
+          "__EMPTY_5": 64,
+          "__EMPTY_7": 64
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-INMC00017",
+          "__EMPTY_3": "START_DEPANNAGE - Debut Dépannage",
+          "__EMPTY_4": "05/08/2026 09:15:59",
+          "__EMPTY_5": 1,
+          "__EMPTY_7": 1
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "23SUR_OMAN",
+          "__EMPTY_1": "Catron OMAN",
+          "__EMPTY_2": "BNR-INMC00096",
+          "__EMPTY_3": "REIMPRESSION_CARTON - Reimpression Carton",
+          "__EMPTY_4": "05/08/2026 08:35:07",
+          "__EMPTY_5": 1,
+          "__EMPTY_7": 1
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-NG6045",
+          "__EMPTY_3": "TEST_RAYONNE - TEST_RAYONNE",
+          "__EMPTY_4": "04/08/2026 14:49:54",
+          "__EMPTY_5": 755,
+          "__EMPTY_6": 354,
+          "__EMPTY_7": 1109
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-NG6044",
+          "__EMPTY_3": "TEST_DIELECTRIC - TEST_DIELECTRIC",
+          "__EMPTY_4": "04/08/2026 14:39:26",
+          "__EMPTY_5": 622,
+          "__EMPTY_6": 1,
+          "__EMPTY_7": 623
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": " "
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "ENEL1"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "Product",
+          "__EMPTY": "Version",
+          "__EMPTY_1": "Designation",
+          "__EMPTY_2": "Post",
+          "__EMPTY_3": "Transaction",
+          "__EMPTY_4": "Last Movement",
+          "__EMPTY_5": "Quantité OK",
+          "__EMPTY_6": "Quantité KO",
+          "__EMPTY_7": "Quantité TOTALE"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-INMC00017_AJOUT",
+          "__EMPTY_3": "LOT_METRO_AJOUT - Ajout de NS Dans Lot Métro",
+          "__EMPTY_4": "05/08/2026 13:43:00",
+          "__EMPTY_5": 1084,
+          "__EMPTY_7": 1084
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": " "
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "OMN-L01"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "Product",
+          "__EMPTY": "Version",
+          "__EMPTY_1": "Designation",
+          "__EMPTY_2": "Post",
+          "__EMPTY_3": "Transaction",
+          "__EMPTY_4": "Last Movement",
+          "__EMPTY_5": "Quantité OK",
+          "__EMPTY_6": "Quantité KO",
+          "__EMPTY_7": "Quantité TOTALE"
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": "254100543S",
+          "__EMPTY": "A01",
+          "__EMPTY_1": "SFIN MT212 OMAN",
+          "__EMPTY_2": "BNR-INMC00004",
+          "__EMPTY_3": "ASSEMBLY_board - Assembly operation",
+          "__EMPTY_4": "04/08/2026 14:40:46",
+          "__EMPTY_5": 619,
+          "__EMPTY_6": 20,
+          "__EMPTY_7": 639
+        },
+        {
+          "The 05/08/2026 à 17:42:43 On the period of time from :03/08/2026 00:00:00 au 05/08/2026 15:25:35": " "
+        }
+      ]
+    }
+  ]
+}
