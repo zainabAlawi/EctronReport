@@ -1,10 +1,10 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
 import { HourlyProductionChart, TargetVsActualChart, AchievementGauge } from '@/components/dashboard/Charts';
 import Link from 'next/link';
 import { Calendar } from 'lucide-react';
+
 export default async function DashboardPage(props: {
   params: Promise<{ division: string }>;
   searchParams: Promise<{ date?: string }>;
@@ -15,24 +15,31 @@ export default async function DashboardPage(props: {
   const selectedDate = searchParams.date || new Date().toISOString().split('T')[0];
 
   let dataForDate = null;
-  if (division === 'water') {
-    try {
-      const dbPath = path.join(process.cwd(), 'src/data/waterProduction.json');
-      const fileData = await fs.readFile(dbPath, 'utf-8');
-      const db = JSON.parse(fileData);
-      dataForDate = db.dates?.[selectedDate] || null;
-    } catch (e) {
-      // file might not exist yet
+  
+  try {
+    const { data, error } = await supabase
+      .from('daily_production')
+      .select('*')
+      .eq('division', division)
+      .eq('date', selectedDate);
+
+    if (error) throw error;
+    
+    if (data && data.length > 0) {
+      dataForDate = {};
+      data.forEach(shiftData => {
+        dataForDate[shiftData.shift] = {
+          assembly: shiftData.assembly,
+          perso: shiftData.perso,
+          lasering: shiftData.lasering,
+          packaging: shiftData.packaging,
+          cartons: shiftData.cartons,
+          palets: shiftData.palets
+        };
+      });
     }
-  } else if (division === 'electricity') {
-    try {
-      const dbPath = path.join(process.cwd(), 'src/data/electricityProduction.json');
-      const fileData = await fs.readFile(dbPath, 'utf-8');
-      const db = JSON.parse(fileData);
-      dataForDate = db.dates?.[selectedDate] || null;
-    } catch (e) {
-      // file might not exist yet
-    }
+  } catch (e) {
+    console.error('Error fetching dashboard data from Supabase:', e);
   }
 
   const metrics = {

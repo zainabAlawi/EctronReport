@@ -1,22 +1,36 @@
 import { NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const division = searchParams.get('division') || 'water';
-  const dataFileName = division === 'water' ? 'waterProduction.json' : 'electricityProduction.json';
-  const DATA_FILE_PATH = path.join(process.cwd(), 'src/data', dataFileName);
   
   try {
-    const fileData = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-    const db = JSON.parse(fileData);
-    return NextResponse.json({ history: db.history || [] });
+    const { data, error } = await supabase
+      .from('production_history')
+      .select('*')
+      .eq('division', division)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    
+    // Map database fields to the expected frontend format
+    const history = data.map(item => ({
+      id: item.id,
+      timestamp: item.created_at,
+      filename: item.filename,
+      date: item.date,
+      shift: item.shift,
+      summary: item.summary,
+      rows: item.rows
+    }));
+
+    return NextResponse.json({ history });
   } catch (e) {
+    console.error('Error fetching history:', e);
     return NextResponse.json({ history: [] });
   }
 }
-
 
 export async function POST(request: Request) {
   try {
@@ -26,9 +40,6 @@ export async function POST(request: Request) {
     if (!division || !date || !shift || !Array.isArray(rows)) {
       return NextResponse.json({ error: 'Missing division, date, shift, or rows' }, { status: 400 });
     }
-
-    const dataFileName = division === 'water' ? 'waterProduction.json' : 'electricityProduction.json';
-    const DATA_FILE_PATH = path.join(process.cwd(), 'src/data', dataFileName);
 
     // Initialize counts
     let assembly = 0;
@@ -43,69 +54,46 @@ export async function POST(request: Request) {
       const transaction = String(row['Transaction'] || row['transaction'] || '').trim();
       const post = String(row['Post'] || row['post'] || '').trim();
 
-      if (transaction.includes('to Perso')) {
-        assembly++;
-      }
-      if (transaction.includes('TEST_PERSO') && post.includes('BNR-INMC00094')) {
-        perso++;
-      }
-      if (transaction.includes('TEST_LASER') && post.includes('BNR-INMC00095')) {
-        lasering++;
-      }
-      if (transaction.includes('GO_CARTON') && post.includes('BNR-INMC00096')) {
-        packaging++;
-      }
-      if (transaction.includes('FINCARTON') && post.includes('BNR-INMC00096')) {
-        cartons++;
-      }
-      if (transaction.includes('FINPALET') && post.includes('BNR-INMC00097')) {
-        palets++;
-      }
-    }
-
-    // Read existing data
-    let db: any = { dates: {}, history: [] };
-    try {
-      const fileData = await fs.readFile(DATA_FILE_PATH, 'utf-8');
-      db = JSON.parse(fileData);
-    } catch (e) {
-      // File doesn't exist or is invalid, use default empty db
-    }
-
-    // Ensure structure for date exists
-    if (!db.dates) db.dates = {};
-    if (!db.history) db.history = [];
-    
-    if (!db.dates[date]) {
-      db.dates[date] = {
-        shift1: { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 },
-        shift2: { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 },
-        shift3: { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 },
-        official: { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 },
-      };
-    } else if (!db.dates[date].official) {
-      db.dates[date].official = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 };
+      if (transaction.includes('to Perso')) assembly++;
+      if (transaction.includes('TEST_PERSO') && post.includes('BNR-INMC00094')) perso++;
+      if (transaction.includes('TEST_LASER') && post.includes('BNR-INMC00095')) lasering++;
+      if (transaction.includes('GO_CARTON') && post.includes('BNR-INMC00096')) packaging++;
+      if (transaction.includes('FINCARTON') && post.includes('BNR-INMC00096')) cartons++;
+      if (transaction.includes('FINPALET') && post.includes('BNR-INMC00097')) palets++;
     }
 
     const shiftKey = shift === 'all' ? 'shift1' : shift; 
 
-    if (db.dates[date][shiftKey]) {
-        db.dates[date][shiftKey] = { assembly, perso, lasering, packaging, cartons, palets };
-    }
+    // Upsert into daily_production table
+    const { error: upsertError } = await supabase
+      .from('daily_production')
+      .upsert({
+        division,
+        date,
+        shift: shiftKey,
+        assembly,
+        perso,
+        lasering,
+        packaging,
+        cartons,
+        palets
+      }, { onConflict: 'division,date,shift' });
 
-    // Add to history
-    db.history.unshift({
-      id: Date.now().toString(),
-      timestamp: new Date().toISOString(),
-      filename: filename || 'Unknown file',
-      date,
-      shift,
-      summary: { assembly, perso, lasering, packaging, cartons, palets },
-      rows
-    });
+    if (upsertError) throw upsertError;
 
-    // Write back to file
-    await fs.writeFile(DATA_FILE_PATH, JSON.stringify(db, null, 2), 'utf-8');
+    // Insert into production_history table
+    const { error: historyError } = await supabase
+      .from('production_history')
+      .insert({
+        division,
+        filename: filename || 'Unknown file',
+        date,
+        shift,
+        summary: { assembly, perso, lasering, packaging, cartons, palets },
+        rows
+      });
+
+    if (historyError) throw historyError;
 
     return NextResponse.json({ success: true, message: 'Data processed successfully' });
   } catch (error) {

@@ -1,5 +1,4 @@
-import fs from 'fs/promises';
-import path from 'path';
+import { supabase } from '@/lib/supabase';
 import YearlyTable from './YearlyTable';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -8,41 +7,40 @@ export default async function YearlyProductionPage(props: { params: Promise<{ di
   const params = await props.params;
   const division = params.division;
 
-  let flatData = [];
+  let flatData: any[] = [];
 
   try {
-    const dataFileName = division === 'water' ? 'waterProduction.json' : 'electricityProduction.json';
-    const dbPath = path.join(process.cwd(), 'src/data', dataFileName);
-    const fileData = await fs.readFile(dbPath, 'utf-8');
-    const db = JSON.parse(fileData);
+    const { data, error } = await supabase
+      .from('daily_production')
+      .select('*')
+      .eq('division', division);
 
-    if (db.dates) {
-      for (const [date, shifts] of Object.entries(db.dates)) {
-        let assembly = 0, perso = 0, lasering = 0, packaging = 0, cartons = 0, palets = 0;
-        
-        // Sum across all available shifts/official data for the day
-        for (const [shiftName, shiftData] of Object.entries(shifts as any)) {
-          assembly += (shiftData as any).assembly || 0;
-          perso += (shiftData as any).perso || 0;
-          lasering += (shiftData as any).lasering || 0;
-          packaging += (shiftData as any).packaging || 0;
-          cartons += (shiftData as any).cartons || 0;
-          palets += (shiftData as any).palets || 0;
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      // Group by date and sum
+      const groupedData: Record<string, any> = {};
+      
+      data.forEach(row => {
+        if (!groupedData[row.date]) {
+          groupedData[row.date] = {
+            date: row.date,
+            assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0
+          };
         }
+        
+        groupedData[row.date].assembly += row.assembly || 0;
+        groupedData[row.date].perso += row.perso || 0;
+        groupedData[row.date].lasering += row.lasering || 0;
+        groupedData[row.date].packaging += row.packaging || 0;
+        groupedData[row.date].cartons += row.cartons || 0;
+        groupedData[row.date].palets += row.palets || 0;
+      });
 
-        flatData.push({
-          date,
-          assembly,
-          perso,
-          lasering,
-          packaging,
-          cartons,
-          palets
-        });
-      }
+      flatData = Object.values(groupedData);
     }
   } catch (e) {
-    console.error(e);
+    console.error('Error fetching yearly production from Supabase:', e);
   }
 
   // Sort newest first
