@@ -10,10 +10,10 @@ export default async function YearlyProductionPage(props: { params: Promise<{ di
   let flatData: any[] = [];
 
   try {
+    const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
     const { data, error } = await supabase
-      .from('daily_production')
-      .select('*')
-      .eq('division', division);
+      .from(targetTable)
+      .select('*');
 
     if (error) throw error;
 
@@ -23,18 +23,30 @@ export default async function YearlyProductionPage(props: { params: Promise<{ di
       
       data.forEach(row => {
         if (!groupedData[row.date]) {
-          groupedData[row.date] = {
-            date: row.date,
-            assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0
-          };
+          if (division === 'water') {
+            groupedData[row.date] = { date: row.date, assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 };
+          } else {
+            groupedData[row.date] = { date: row.date, cards: 0, assembly: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0, perso: 0 };
+          }
         }
         
-        groupedData[row.date].assembly += row.assembly || 0;
-        groupedData[row.date].perso += row.perso || 0;
-        groupedData[row.date].lasering += row.lasering || 0;
-        groupedData[row.date].packaging += row.packaging || 0;
-        groupedData[row.date].cartons += row.cartons || 0;
-        groupedData[row.date].palets += row.palets || 0;
+        if (division === 'water') {
+          groupedData[row.date].assembly += row.assembly || 0;
+          groupedData[row.date].perso += row.perso || 0;
+          groupedData[row.date].lasering += row.lasering || 0;
+          groupedData[row.date].packaging += row.packaging || 0;
+          groupedData[row.date].cartons += row.cartons || 0;
+          groupedData[row.date].palets += row.palets || 0;
+        } else {
+          groupedData[row.date].cards += row.cards || 0;
+          groupedData[row.date].assembly += row.assembly || 0;
+          groupedData[row.date].insolation += row.insolation || 0;
+          groupedData[row.date].radiation_frequency += row.radiation_frequency || 0;
+          groupedData[row.date].calibration += row.calibration || 0;
+          groupedData[row.date].multy_test += row.multy_test || 0;
+          groupedData[row.date].metrology += row.metrology || 0;
+          groupedData[row.date].perso += row.perso || 0;
+        }
       });
 
       flatData = Object.values(groupedData);

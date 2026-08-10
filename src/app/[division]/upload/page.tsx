@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UploadCloud, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Calendar, Download, X } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Calendar, Download, X, Trash2 } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import clsx from 'clsx';
 import * as XLSX from 'xlsx';
@@ -10,6 +10,7 @@ export default function UploadPage() {
   const params = useParams();
   const division = params.division;
   
+  const [uploadMode, setUploadMode] = useState<'daily' | 'yearly'>('daily');
   const [shiftType, setShiftType] = useState<'shift' | 'official'>('shift');
   const [shift, setShift] = useState('shift1');
   
@@ -20,6 +21,8 @@ export default function UploadPage() {
 
   const [history, setHistory] = useState<any[]>([]);
   const [selectedHistory, setSelectedHistory] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchHistory = async () => {
     try {
@@ -68,31 +71,121 @@ export default function UploadPage() {
 
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
+      const workbook = XLSX.read(data, { cellDates: true });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(worksheet);
-      
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          division,
-          date,
-          shift: shiftType === 'official' ? 'official' : shift,
-          rows: json,
-          filename: file.name
-        })
-      });
 
-      if (!res.ok) {
-        throw new Error('Upload processing failed');
+      if (uploadMode === 'yearly') {
+        const json: any[] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        
+        let dates: { dateStr: string, achIndex: number }[] = []; 
+        let dailyData: Record<string, any> = {}; 
+
+        for (let r = 0; r < json.length; r++) {
+          const row = json[r];
+          if (!row || !row.length) continue;
+          
+          const firstCell = String(row[0]).trim();
+          
+          if (firstCell === 'Date') {
+            dates = [];
+            for (let c = 1; c < row.length; c++) {
+              if (row[c]) {
+                let d = row[c];
+                let dateStr = '';
+                if (d instanceof Date) {
+                  dateStr = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                } else if (typeof d === 'number') {
+                  dateStr = new Date((d - 25569) * 86400 * 1000).toISOString().split('T')[0];
+                } else {
+                  const parsed = new Date(d);
+                  if (!isNaN(parsed.getTime())) dateStr = parsed.toISOString().split('T')[0];
+                }
+                
+                if (dateStr) {
+                  dates.push({ dateStr, achIndex: c + 1 });
+                  if (!dailyData[dateStr]) {
+                    dailyData[dateStr] = { date: dateStr, assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
+                  }
+                }
+              }
+            }
+          } else if (dates.length > 0) {
+            let dbKey = '';
+            if (firstCell.includes('Assembly')) dbKey = 'assembly';
+            else if (firstCell.includes('Perso')) dbKey = 'perso';
+            else if (firstCell.includes('Lazi') || firstCell.includes('Laser')) dbKey = 'lasering';
+            else if (firstCell.includes('Backag') || firstCell.includes('Packag')) dbKey = 'packaging';
+            else if (firstCell.includes('Carton')) dbKey = 'cartons';
+            else if (firstCell.includes('Palet')) dbKey = 'palets';
+            else if (firstCell.includes('Card')) dbKey = 'cards';
+            else if (firstCell.includes('Insol')) dbKey = 'insolation';
+            else if (firstCell.includes('Radia')) dbKey = 'radiation_frequency';
+            else if (firstCell.includes('Calib')) dbKey = 'calibration';
+            else if (firstCell.includes('Multy')) dbKey = 'multy_test';
+            else if (firstCell.includes('Metro')) dbKey = 'metrology';
+            
+            if (dbKey) {
+              for (const d of dates) {
+                const val = parseInt(row[d.achIndex]) || 0;
+                dailyData[d.dateStr][dbKey] += val;
+              }
+            }
+          }
+        }
+        
+        const daysData = Object.values(dailyData);
+        
+        const res = await fetch('/api/upload/yearly', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ division, filename: file.name, daysData })
+        });
+
+        if (!res.ok) throw new Error('Upload processing failed');
+
+      } else {
+        const json = XLSX.utils.sheet_to_json(worksheet);
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            division,
+            date,
+            shift: shiftType === 'official' ? 'official' : shift,
+            rows: json,
+            filename: file.name
+          })
+        });
+
+        if (!res.ok) throw new Error('Upload processing failed');
       }
 
       setStatus('success');
-      fetchHistory(); // Refresh history
+      fetchHistory(); 
     } catch (error) {
       console.error(error);
       setStatus('error');
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingId) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/upload?id=${deletingId}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setDeletingId(null);
+        fetchHistory();
+      } else {
+        alert('Failed to delete report.');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('An error occurred while deleting.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -105,75 +198,101 @@ export default function UploadPage() {
 
       <div className="glass rounded-3xl p-8 border border-border flex flex-col gap-8">
         
-        {/* Date Selection */}
-        <div>
-          <label className="text-sm font-medium text-zinc-300 mb-4 block">Select Date</label>
-          <input 
-            type="date" 
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-          />
+        {/* Mode Selection */}
+        <div className="flex p-1 bg-zinc-900/50 rounded-xl w-fit border border-zinc-800 mb-2">
+          <button
+            onClick={() => setUploadMode('daily')}
+            className={clsx(
+              "px-6 py-2 rounded-lg text-sm font-medium transition-all",
+              uploadMode === 'daily' ? "bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            تقرير شفتات (Daily Report)
+          </button>
+          <button
+            onClick={() => setUploadMode('yearly')}
+            className={clsx(
+              "px-6 py-2 rounded-lg text-sm font-medium transition-all",
+              uploadMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+            )}
+          >
+            تقرير تراكمي/سنوي (Yearly Report)
+          </button>
         </div>
 
-        {/* Shift Type Selection */}
-        <div>
-          <label className="text-sm font-medium text-zinc-300 mb-4 block">Working Hours Type</label>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-             <label 
-                className={clsx(
-                  "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
-                  shiftType === 'shift' 
-                    ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                    : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                )}
-                onClick={() => setShiftType('shift')}
-              >
-                <span className="font-medium">شفتات (Shifts)</span>
-              </label>
-              <label 
-                className={clsx(
-                  "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
-                  shiftType === 'official' 
-                    ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                    : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                )}
-                onClick={() => setShiftType('official')}
-              >
-                <span className="font-medium">دوام رسمي (Official)</span>
-              </label>
-          </div>
-
-          {shiftType === 'shift' && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
-              {[
-                { id: 'shift1', label: 'Shift 1' },
-                { id: 'shift2', label: 'Shift 2' },
-                { id: 'shift3', label: 'Shift 3' },
-                { id: 'all', label: 'All Shifts' }
-              ].map(s => (
-                <label 
-                  key={s.id} 
-                  className={clsx(
-                    "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
-                    shift === s.id 
-                      ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                      : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
-                  )}
-                  onClick={() => setShift(s.id)}
-                >
-                  <div className={clsx(
-                    "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
-                    shift === s.id ? "border-blue-400" : "border-zinc-600"
-                  )}>
-                    {shift === s.id && <div className="w-2 h-2 rounded-full bg-blue-400" />}
-                  </div>
-                  <span className="font-medium text-sm">{s.label}</span>
-                </label>
-              ))}
+        {uploadMode === 'daily' && (
+          <>
+            {/* Date Selection */}
+            <div>
+              <label className="text-sm font-medium text-zinc-300 mb-4 block">Select Date</label>
+              <input 
+                type="date" 
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+              />
             </div>
-          )}
-        </div>
+
+            {/* Shift Type Selection */}
+            <div>
+              <label className="text-sm font-medium text-zinc-300 mb-4 block">Working Hours Type</label>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                 <label 
+                    className={clsx(
+                      "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                      shiftType === 'shift' 
+                        ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
+                        : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                    )}
+                    onClick={() => setShiftType('shift')}
+                  >
+                    <span className="font-medium">شفتات (Shifts)</span>
+                  </label>
+                  <label 
+                    className={clsx(
+                      "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                      shiftType === 'official' 
+                        ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
+                        : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                    )}
+                    onClick={() => setShiftType('official')}
+                  >
+                    <span className="font-medium">دوام رسمي (Official)</span>
+                  </label>
+              </div>
+
+              {shiftType === 'shift' && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
+                  {[
+                    { id: 'shift1', label: 'Shift 1' },
+                    { id: 'shift2', label: 'Shift 2' },
+                    { id: 'shift3', label: 'Shift 3' },
+                    { id: 'all', label: 'All Shifts' }
+                  ].map(s => (
+                    <label 
+                      key={s.id} 
+                      className={clsx(
+                        "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
+                        shift === s.id 
+                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
+                          : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                      )}
+                      onClick={() => setShift(s.id)}
+                    >
+                      <div className={clsx(
+                        "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
+                        shift === s.id ? "border-blue-400" : "border-zinc-600"
+                      )}>
+                        {shift === s.id && <div className="w-2 h-2 rounded-full bg-blue-400" />}
+                      </div>
+                      <span className="font-medium text-sm">{s.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Drag and Drop Zone */}
         <div
@@ -253,11 +372,13 @@ export default function UploadPage() {
           ) : (
             history.map((item) => (
               <div 
-                key={item.id} 
-                onClick={() => setSelectedHistory(item)}
-                className="glass rounded-xl p-5 border border-border flex items-center justify-between cursor-pointer hover:bg-white/5 transition-colors group"
+                key={item.id}
+                className="glass rounded-xl p-5 border border-border flex items-center justify-between hover:bg-white/5 transition-colors group"
               >
-                <div className="flex items-center gap-4">
+                <div 
+                  className="flex items-center gap-4 cursor-pointer flex-1"
+                  onClick={() => setSelectedHistory(item)}
+                >
                   <div className="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileSpreadsheet className="w-6 h-6" />
                   </div>
@@ -270,14 +391,58 @@ export default function UploadPage() {
                     </div>
                   </div>
                 </div>
-                <div className="text-sm font-medium text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Data &rarr;
+                
+                <div className="flex items-center gap-3">
+                  <div 
+                    onClick={() => setSelectedHistory(item)}
+                    className="text-sm font-medium text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer px-4 py-2 hover:bg-blue-500/10 rounded-lg"
+                  >
+                    View Data
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDeletingId(item.id);
+                    }}
+                    className="p-2 text-zinc-500 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                    title="Delete Report"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             ))
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-2">Delete Report?</h3>
+            <p className="text-zinc-400 mb-6 text-sm">
+              Are you sure you want to delete this report? This will remove its data from the dashboard entirely. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeletingId(null)}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 rounded-lg border border-zinc-700 text-white font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 rounded-lg bg-danger text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal for viewing full data */}
       {selectedHistory && (

@@ -1,9 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
-import { HourlyProductionChart, TargetVsActualChart, AchievementGauge } from '@/components/dashboard/Charts';
+import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart } from '@/components/dashboard/Charts';
 import Link from 'next/link';
 import { Calendar } from 'lucide-react';
+import DashboardControls from '@/components/dashboard/DashboardControls';
 
 export default async function DashboardPage(props: {
   params: Promise<{ division: string }>;
@@ -12,15 +13,34 @@ export default async function DashboardPage(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const division = params.division;
-  const selectedDate = searchParams.date || new Date().toISOString().split('T')[0];
+  const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+  
+  let selectedDate = searchParams.date;
+  if (!selectedDate) {
+    const { data: latestDateData } = await supabase
+      .from('production_history')
+      .select('date')
+      .eq('division', division)
+      .order('date', { ascending: false })
+      .limit(1);
+      
+    if (latestDateData && latestDateData.length > 0) {
+      selectedDate = latestDateData[0].date;
+    } else {
+      selectedDate = new Date().toISOString().split('T')[0];
+    }
+  }
 
-  let dataForDate = null;
+  let dataForDate: any = null;
+  let achieved = 0;
+  
+  let latestFileName = null;
+  let latestFileTime = null;
   
   try {
     const { data, error } = await supabase
-      .from('daily_production')
+      .from(targetTable)
       .select('*')
-      .eq('division', division)
       .eq('date', selectedDate);
 
     if (error) throw error;
@@ -28,54 +48,129 @@ export default async function DashboardPage(props: {
     if (data && data.length > 0) {
       dataForDate = {};
       data.forEach(shiftData => {
-        dataForDate[shiftData.shift] = {
-          assembly: shiftData.assembly,
-          perso: shiftData.perso,
-          lasering: shiftData.lasering,
-          packaging: shiftData.packaging,
-          cartons: shiftData.cartons,
-          palets: shiftData.palets
-        };
+        dataForDate[shiftData.shift] = shiftData;
+        if (division === 'water') {
+            achieved += shiftData.packaging || 0;
+        } else {
+            achieved += shiftData.multy_test || 0;
+        }
       });
     }
-  } catch (e) {
-    console.error('Error fetching dashboard data from Supabase:', e);
+
+    const { data: latestFile } = await supabase
+      .from('production_history')
+      .select('filename, created_at')
+      .eq('division', division)
+      .eq('date', selectedDate)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (latestFile && latestFile.length > 0) {
+      latestFileName = latestFile[0].filename;
+      latestFileTime = new Date(latestFile[0].created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    }
+  } catch (e: any) {
+    console.error('Error fetching dashboard data from Supabase:', e?.message || e);
   }
 
+  const target = 6400; // Fixed target for now, can be made dynamic later
+  const remaining = Math.max(0, target - achieved);
+  const efficiency = target > 0 ? Number(((achieved / target) * 100).toFixed(1)) : 0;
+
   const metrics = {
-    target: 6400,
-    achieved: 5890,
-    achievement: 92,
-    remaining: 510,
-    efficiency: 92,
+    target,
+    achieved,
+    achievement: efficiency,
+    remaining,
+    efficiency,
   };
+
+  const shiftProductionData = [0, 0, 0, 0];
+  if (dataForDate) {
+    if (dataForDate['shift1']) shiftProductionData[0] = division === 'water' ? (dataForDate['shift1'].packaging || 0) : (dataForDate['shift1'].multy_test || 0);
+    if (dataForDate['shift2']) shiftProductionData[1] = division === 'water' ? (dataForDate['shift2'].packaging || 0) : (dataForDate['shift2'].multy_test || 0);
+    if (dataForDate['shift3']) shiftProductionData[2] = division === 'water' ? (dataForDate['shift3'].packaging || 0) : (dataForDate['shift3'].multy_test || 0);
+    if (dataForDate['official']) shiftProductionData[3] = division === 'water' ? (dataForDate['official'].packaging || 0) : (dataForDate['official'].multy_test || 0);
+  }
+
+  let chartCategories: string[] = [];
+  let chartTargetData: number[] = [];
+  let chartActualData: number[] = [];
+
+  if (division === 'water') {
+    chartCategories = ['Assembly', 'Perso', 'Lasering', 'Packaging (Meters)'];
+    chartTargetData = [6400, 6400, 6400, 6400];
+    let actAssembly = 0, actPerso = 0, actLasering = 0, actPackaging = 0;
+    if (dataForDate) {
+      Object.values(dataForDate).forEach((shiftData: any) => {
+        actAssembly += shiftData.assembly || 0;
+        actPerso += shiftData.perso || 0;
+        actLasering += shiftData.lasering || 0;
+        actPackaging += shiftData.packaging || 0;
+      });
+    }
+    chartActualData = [actAssembly, actPerso, actLasering, actPackaging];
+  } else {
+    chartCategories = ['Assembly', 'Insolation', 'Calibration', 'Multy test', 'Metrology', 'Perso', 'Cards'];
+    chartTargetData = Array(7).fill(6400); 
+    let actAssembly = 0, actInsolation = 0, actCalibration = 0, actMultyTest = 0, actMetrology = 0, actPerso = 0, actCards = 0;
+    if (dataForDate) {
+      Object.values(dataForDate).forEach((shiftData: any) => {
+        actAssembly += shiftData.assembly || 0;
+        actInsolation += shiftData.insolation || 0;
+        actCalibration += shiftData.calibration || 0;
+        actMultyTest += shiftData.multy_test || 0;
+        actMetrology += shiftData.metrology || 0;
+        actPerso += shiftData.perso || 0;
+        actCards += shiftData.cards || 0;
+      });
+    }
+    chartActualData = [actAssembly, actInsolation, actCalibration, actMultyTest, actMetrology, actPerso, actCards];
+  }
 
   const isWarning = metrics.efficiency < 90;
   const isExcellent = metrics.achieved >= metrics.target;
 
   const displayDate = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate));
+  
+  const mode = searchParams.mode || 'daily';
+  const year = searchParams.year || new Date().getFullYear().toString();
+
+  // If we need yearly data for the yearly mode
+  let yearlyData: any[] = [];
+  if (mode === 'yearly') {
+    const { data: yData } = await supabase
+      .from(targetTable)
+      .select('*')
+      .like('date', `${year}-%`);
+    yearlyData = yData || [];
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Today's Production - {displayDate}</h1>
+          <h1 className="text-2xl font-bold text-white">
+            {mode === 'daily' ? `Today's Production - ${displayDate}` : `Yearly Overview - ${year}`}
+          </h1>
           <p className="text-zinc-400 text-sm mt-1">Real-time overview of smart meters assembly</p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
+          <DashboardControls currentMode={mode} currentDate={selectedDate} currentYear={year} division={division} />
+          
           <Link href={`/${division}/yearly-production`} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium flex items-center gap-2 transition-colors">
             <Calendar className="w-4 h-4" />
-            عرض إنتاج السنة كاملة
+            عرض تفاصيل السنة كاملة
           </Link>
           
-          {isWarning && (
+          {mode === 'daily' && isWarning && (
             <div className="px-4 py-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm font-medium flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-danger animate-pulse"></span>
               Warning: Efficiency below 90%
             </div>
           )}
-          {isExcellent && (
+          {mode === 'daily' && isExcellent && (
             <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               Excellent: Target Reached!
@@ -84,33 +179,49 @@ export default async function DashboardPage(props: {
         </div>
       </div>
 
-      <MetricsCards metrics={metrics} />
+      {mode === 'daily' ? (
+        <>
+          <MetricsCards metrics={metrics} />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              <div className="glass rounded-2xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-white mb-6">Production Overview</h3>
+                <ProductionTable 
+                  type={division as 'water' | 'electricity'} 
+                  dynamicWaterData={dataForDate} 
+                  date={selectedDate} 
+                  latestFileName={latestFileName}
+                  latestFileTime={latestFileTime}
+                />
+              </div>
+              
+              <div className="glass rounded-2xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-white mb-6">Shift Production</h3>
+                <ShiftProductionChart data={shiftProductionData} />
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-6">
+              <div className="glass rounded-2xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-white mb-6">Achievement</h3>
+                <AchievementGauge efficiency={efficiency} />
+              </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 flex flex-col gap-6">
-          <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Production Overview</h3>
-            <ProductionTable type={division as 'water' | 'electricity'} dynamicWaterData={dataForDate} date={selectedDate} />
+              <div className="glass rounded-2xl p-6 border border-border">
+                <h3 className="text-lg font-semibold text-white mb-6">Target vs Actual</h3>
+                <TargetVsActualChart categories={chartCategories} targetData={chartTargetData} actualData={chartActualData} />
+              </div>
+            </div>
           </div>
-          
+        </>
+      ) : (
+        <div className="grid grid-cols-1 gap-6">
           <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Hourly Production</h3>
-            <HourlyProductionChart />
+            <h3 className="text-lg font-semibold text-white mb-6">Yearly Aggregation by Month</h3>
+            <MonthlyAggregationChart dbData={yearlyData} division={division} year={year} />
           </div>
         </div>
-        
-        <div className="flex flex-col gap-6">
-          <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Achievement</h3>
-            <AchievementGauge />
-          </div>
-
-          <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Target vs Actual</h3>
-            <TargetVsActualChart />
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

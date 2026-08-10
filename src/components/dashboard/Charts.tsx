@@ -2,12 +2,12 @@
 
 import ReactECharts from 'echarts-for-react';
 
-export function HourlyProductionChart() {
+export function ShiftProductionChart({ data }: { data: number[] }) {
   const options = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'category',
-      data: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'],
+      data: ['Shift 1', 'Shift 2', 'Shift 3', 'Official'],
       axisLabel: { color: '#a1a1aa' },
     },
     yAxis: {
@@ -17,8 +17,9 @@ export function HourlyProductionChart() {
     },
     series: [
       {
-        data: [120, 200, 150, 280, 210, 240, 290, 310],
+        data: data || [0, 0, 0, 0],
         type: 'line',
+        label: { show: true, position: 'top', color: '#fff' },
         smooth: true,
         lineStyle: { width: 3, color: '#3b82f6' },
         areaStyle: {
@@ -35,13 +36,13 @@ export function HourlyProductionChart() {
   return <ReactECharts option={options} style={{ height: '300px' }} />;
 }
 
-export function TargetVsActualChart() {
+export function TargetVsActualChart({ categories, targetData, actualData }: { categories: string[], targetData: number[], actualData: number[] }) {
   const options = {
     tooltip: { trigger: 'axis' },
     legend: { textStyle: { color: '#a1a1aa' }, top: 0 },
     xAxis: {
       type: 'category',
-      data: ['Assembly', 'Insulation', 'Calibration'],
+      data: categories || [],
       axisLabel: { color: '#a1a1aa' },
     },
     yAxis: {
@@ -53,13 +54,15 @@ export function TargetVsActualChart() {
       {
         name: 'Target',
         type: 'bar',
-        data: [1920, 1920, 1920],
+        data: targetData || [],
+        label: { show: true, position: 'top', color: '#fff' },
         itemStyle: { color: '#27272a', borderRadius: [4, 4, 0, 0] },
       },
       {
         name: 'Actual',
         type: 'bar',
-        data: [1895, 1920, 1848],
+        data: actualData || [],
+        label: { show: true, position: 'top', color: '#fff' },
         itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] },
       }
     ]
@@ -68,7 +71,7 @@ export function TargetVsActualChart() {
   return <ReactECharts option={options} style={{ height: '300px' }} />;
 }
 
-export function AchievementGauge() {
+export function AchievementGauge({ efficiency }: { efficiency: number }) {
   const options = {
     series: [
       {
@@ -96,18 +99,34 @@ export function AchievementGauge() {
         axisTick: { length: 12, lineStyle: { color: 'auto', width: 2 } },
         splitLine: { length: 20, lineStyle: { color: 'auto', width: 5 } },
         axisLabel: { color: '#a1a1aa', distance: -60, fontSize: 14 },
-        title: { offsetCenter: [0, '-20%'], fontSize: 14, color: '#a1a1aa' },
-        detail: {
-          fontSize: 30,
-          offsetCenter: [0, '20%'],
-          valueAnimation: true,
-          formatter: '{value}%',
-          color: 'inherit'
-        },
-        data: [{ value: 92, name: 'Achievement' }]
+        title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: '#a1a1aa' } },
+        detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}%', color: 'auto' },
+        data: [{ value: efficiency, name: 'Efficiency' }]
       }
     ]
   };
 
-  return <ReactECharts option={options} style={{ height: '250px' }} />;
+  return <ReactECharts option={options} style={{ height: '300px' }} />;
+}
+
+export function MonthlyAggregationChart({ dbData, division, year }: { dbData: any[], division: string, year: string }) {
+  const isWater = division === 'water';
+  const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+  
+  dbData.forEach(d => {
+    if (d.date && d.date.startsWith(year)) {
+      const monthIndex = new Date(d.date).getMonth();
+      const val = isWater ? (d.packaging || 0) : (d.multy_test || 0);
+      data[monthIndex] += val;
+    }
+  });
+
+  const options = {
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#a1a1aa' } },
+    yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
+    series: [{ type: 'bar', data: data, label: { show: true, position: 'top', color: '#fff' }, itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] } }]
+  };
+
+  return <ReactECharts option={options} style={{ height: '400px' }} />;
 }

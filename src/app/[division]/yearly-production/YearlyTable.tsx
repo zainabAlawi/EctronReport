@@ -73,31 +73,60 @@ export default function YearlyTable({ data, division }: { data: DailyData[], div
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-400 border-b border-border">
-              <tr>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Assembly</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Perso</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Lasering</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Packaging</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Cartons</th>
-                <th className="px-6 py-4 font-medium whitespace-nowrap">Pallets</th>
-              </tr>
+              {division === 'water' ? (
+                <tr>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Assembly</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Perso</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Lasering</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Packaging</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Cartons</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Pallets</th>
+                </tr>
+              ) : (
+                <tr>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Cards</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Assembly</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Insolation</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Radiation Freq</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Calibration</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Multy Test</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Metrology</th>
+                  <th className="px-6 py-4 font-medium whitespace-nowrap">Perso</th>
+                </tr>
+              )}
             </thead>
             <tbody className="divide-y divide-border/50">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-zinc-500">No data found.</td>
+                  <td colSpan={division === 'water' ? 7 : 9} className="px-6 py-8 text-center text-zinc-500">No data found.</td>
                 </tr>
               ) : (
                 filteredData.map((row) => (
                   <tr key={row.date} className="bg-transparent hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 font-medium text-white">{row.date}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.assembly}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.perso}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.lasering}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.packaging}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.cartons}</td>
-                    <td className="px-6 py-4 text-zinc-300">{row.palets}</td>
+                    {division === 'water' ? (
+                      <>
+                        <td className="px-6 py-4 text-zinc-300">{row.assembly}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.perso}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.lasering}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.packaging}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.cartons}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.palets}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-6 py-4 text-zinc-300">{row.cards}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.assembly}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.insolation}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.radiation_frequency}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.calibration}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.multy_test}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.metrology}</td>
+                        <td className="px-6 py-4 text-zinc-300">{row.perso}</td>
+                      </>
+                    )}
                   </tr>
                 ))
               )}
