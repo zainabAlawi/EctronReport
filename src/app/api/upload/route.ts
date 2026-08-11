@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
     const { error: upsertError } = await supabase
       .from(targetTable)
-      .upsert(payload, { onConflict: 'date,shift' });
+      .upsert(payload as any, { onConflict: 'date,shift' });
 
     if (upsertError) throw upsertError;
 

@@ -8,7 +8,7 @@ import DashboardControls from '@/components/dashboard/DashboardControls';
 
 export default async function DashboardPage(props: {
   params: Promise<{ division: string }>;
-  searchParams: Promise<{ date?: string }>;
+  searchParams: Promise<{ date?: string; mode?: string; year?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
@@ -131,7 +131,7 @@ export default async function DashboardPage(props: {
   const isWarning = metrics.efficiency < 90;
   const isExcellent = metrics.achieved >= metrics.target;
 
-  const displayDate = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate));
+  const displayDate = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate as string));
   
   const mode = searchParams.mode || 'daily';
   const year = searchParams.year || new Date().getFullYear().toString();
@@ -157,7 +157,7 @@ export default async function DashboardPage(props: {
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <DashboardControls currentMode={mode} currentDate={selectedDate} currentYear={year} division={division} />
+          <DashboardControls currentMode={mode} currentDate={selectedDate as string} currentYear={year} division={division} />
           
           <Link href={`/${division}/yearly-production`} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium flex items-center gap-2 transition-colors">
             <Calendar className="w-4 h-4" />

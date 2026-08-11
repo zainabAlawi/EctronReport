@@ -8,10 +8,16 @@ interface DailyData {
   date: string;
   assembly: number;
   perso: number;
-  lasering: number;
-  packaging: number;
-  cartons: number;
-  palets: number;
+  lasering?: number;
+  packaging?: number;
+  cartons?: number;
+  palets?: number;
+  cards?: number;
+  insolation?: number;
+  radiation_frequency?: number;
+  calibration?: number;
+  multy_test?: number;
+  metrology?: number;
 }
 
 export default function YearlyTable({ data, division }: { data: DailyData[], division: string }) {
