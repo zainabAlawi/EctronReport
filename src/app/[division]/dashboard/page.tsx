@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic';
 import { supabase } from '@/lib/supabase';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
-import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart } from '@/components/dashboard/Charts';
+import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart, YearlyGrowthChart } from '@/components/dashboard/Charts';
+import YearlyTable from '../yearly-production/YearlyTable';
 import Link from 'next/link';
 import { Calendar } from 'lucide-react';
 import DashboardControls from '@/components/dashboard/DashboardControls';
@@ -140,12 +141,48 @@ export default async function DashboardPage(props: {
 
   // If we need yearly data for the yearly mode
   let yearlyData: any[] = [];
+  let allData: any[] = [];
+  let flatData: any[] = [];
+
   if (mode === 'yearly') {
     const { data: yData } = await supabase
       .from(targetTable)
-      .select('*')
-      .like('date', `${year}-%`);
-    yearlyData = yData || [];
+      .select('*');
+    
+    allData = yData || [];
+    yearlyData = allData.filter(d => d.date && d.date.startsWith(year));
+
+    // Group yearlyData for YearlyTable
+    const groupedData: Record<string, any> = {};
+    yearlyData.forEach(row => {
+        if (!groupedData[row.date]) {
+          if (division === 'water') {
+            groupedData[row.date] = { date: row.date, assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 };
+          } else {
+            groupedData[row.date] = { date: row.date, cards: 0, assembly: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0, perso: 0 };
+          }
+        }
+        
+        if (division === 'water') {
+          groupedData[row.date].assembly += row.assembly || 0;
+          groupedData[row.date].perso += row.perso || 0;
+          groupedData[row.date].lasering += row.lasering || 0;
+          groupedData[row.date].packaging += row.packaging || 0;
+          groupedData[row.date].cartons += row.cartons || 0;
+          groupedData[row.date].palets += row.palets || 0;
+        } else {
+          groupedData[row.date].cards += row.cards || 0;
+          groupedData[row.date].assembly += row.assembly || 0;
+          groupedData[row.date].insolation += row.insolation || 0;
+          groupedData[row.date].radiation_frequency += row.radiation_frequency || 0;
+          groupedData[row.date].calibration += row.calibration || 0;
+          groupedData[row.date].multy_test += row.multy_test || 0;
+          groupedData[row.date].metrology += row.metrology || 0;
+          groupedData[row.date].perso += row.perso || 0;
+        }
+    });
+    flatData = Object.values(groupedData);
+    flatData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }
 
   return (
@@ -218,9 +255,20 @@ export default async function DashboardPage(props: {
         </>
       ) : (
         <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="glass rounded-2xl p-6 border border-border">
+              <h3 className="text-lg font-semibold text-white mb-6">Yearly Aggregation by Month - {year}</h3>
+              <MonthlyAggregationChart dbData={yearlyData} division={division} year={year} />
+            </div>
+            <div className="glass rounded-2xl p-6 border border-border">
+              <h3 className="text-lg font-semibold text-white mb-6">Overall Yearly Growth</h3>
+              <YearlyGrowthChart dbData={allData} division={division} />
+            </div>
+          </div>
+          
           <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Yearly Aggregation by Month</h3>
-            <MonthlyAggregationChart dbData={yearlyData} division={division} year={year} />
+            <h3 className="text-lg font-semibold text-white mb-6">Production Data - {year}</h3>
+            <YearlyTable data={flatData} division={division} />
           </div>
         </div>
       )}

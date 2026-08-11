@@ -130,3 +130,31 @@ export function MonthlyAggregationChart({ dbData, division, year }: { dbData: an
 
   return <ReactECharts option={options} style={{ height: '400px' }} />;
 }
+
+export function YearlyGrowthChart({ dbData, division }: { dbData: any[], division: string }) {
+  const isWater = division === 'water';
+  const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
+
+  const startYear = isWater ? 2025 : 2023;
+  const numYears = 5;
+  const data = Array(numYears).fill(0);
+  const yearsLabels = Array.from({ length: numYears }, (_, i) => (startYear + i).toString());
+
+  dbData.forEach(d => {
+    if (d.date) {
+      const year = new Date(d.date).getFullYear();
+      const index = year - startYear;
+      if (index >= 0 && index < numYears) {
+        data[index] += getDailyTotal(d);
+      }
+    }
+  });
+
+  const options = {
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: '#a1a1aa' } },
+    yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
+    series: [{ type: 'bar', data: data, label: { show: true, position: 'top', color: '#fff' }, itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } }]
+  };
+  return <ReactECharts option={options} style={{ height: '300px' }} />;
+}
