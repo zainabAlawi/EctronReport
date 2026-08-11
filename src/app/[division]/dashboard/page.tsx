@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { supabase } from '@/lib/supabase';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';

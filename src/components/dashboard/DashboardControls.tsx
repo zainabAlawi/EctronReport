@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar as CalendarIcon, Clock, Filter } from 'lucide-react';
 import clsx from 'clsx';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 export default function DashboardControls({ currentMode, currentDate, currentYear, division }: { currentMode: string, currentDate: string, currentYear: string, division: string }) {
   const router = useRouter();
@@ -33,8 +34,8 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
     <div className="flex flex-col sm:flex-row items-center gap-3">
       {/* Mode Toggle */}
       <div className="flex p-1 bg-zinc-900/80 rounded-xl border border-zinc-800">
-        <button
-          onClick={() => handleModeChange('daily')}
+        <Link
+          href={`/${division}/dashboard?mode=daily&date=${currentDate}&year=${currentYear}`}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
             currentMode === 'daily' ? "bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
@@ -42,9 +43,9 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
         >
           <Clock className="w-4 h-4" />
           يومي (Daily)
-        </button>
-        <button
-          onClick={() => handleModeChange('yearly')}
+        </Link>
+        <Link
+          href={`/${division}/dashboard?mode=yearly&date=${currentDate}&year=${currentYear}`}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
             currentMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
@@ -52,7 +53,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
         >
           <CalendarIcon className="w-4 h-4" />
           سنوي (Yearly)
-        </button>
+        </Link>
       </div>
 
       {/* Date/Year Picker */}
