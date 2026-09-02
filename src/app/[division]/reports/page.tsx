@@ -36,6 +36,25 @@ export default function ReportsPage() {
     if (dates.length > 0) latestDate = dates[0];
   }
   
+  const [latestTarget, setLatestTarget] = useState(640);
+
+  useEffect(() => {
+    async function fetchHistoryTarget() {
+      const { data } = await supabase
+        .from('production_history')
+        .select('summary')
+        .eq('division', division)
+        .eq('date', latestDate)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (data && data.length > 0 && data[0].summary?.target) {
+        setLatestTarget(data[0].summary.target);
+      }
+    }
+    fetchHistoryTarget();
+  }, [division, latestDate]);
+
   const dailyData = dbData.filter(d => d.date === latestDate);
   
   const todayTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
@@ -116,7 +135,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="glass rounded-2xl p-6 border border-border min-h-[400px]">
-        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={latestDate} />}
+        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={latestDate} target={latestTarget} />}
         {activeTab === 'Weekly' && <WeeklyReport dbData={dbData} division={division} year={selectedYear} month={selectedMonth} />}
         {activeTab === 'Monthly' && <MonthlyReport dbData={dbData} division={division} year={selectedYear} />}
         {activeTab === 'Yearly' && <YearlyReport dbData={dbData} division={division} />}
@@ -125,10 +144,9 @@ export default function ReportsPage() {
   );
 }
 
-function DailyReport({ division, totals, date }: { division: string, totals: any, date: string }) {
+function DailyReport({ division, totals, date, target }: { division: string, totals: any, date: string, target: number }) {
   const isWater = division === 'water';
   
-  const target = 6400;
   const achieved = isWater ? totals.packaging : totals.multy_test;
   const remaining = Math.max(0, target - achieved);
   const eff = target > 0 ? ((achieved / target) * 100).toFixed(1) : '0';

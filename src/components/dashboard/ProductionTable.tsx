@@ -17,13 +17,15 @@ export default function ProductionTable({
   dynamicWaterData,
   date,
   latestFileName,
-  latestFileTime
+  latestFileTime,
+  target = 640
 }: { 
   type?: 'water' | 'electricity',
   dynamicWaterData?: any,
   date?: string,
   latestFileName?: string | null,
-  latestFileTime?: string | null
+  latestFileTime?: string | null,
+  target?: number
 }) {
   const shifts = dynamicWaterData || {
     shift1: {},
@@ -64,11 +66,11 @@ export default function ProductionTable({
 
   if (type === 'water') {
     const waterProductionData = [
-      buildRow('Assembly', 640, 'assembly'),
-      buildRow('Perso', 640, 'perso'),
-      buildRow('lasering', 640, 'lasering'),
-      buildRow('Packaging (Meters)', 640, 'packaging'),
-      buildRow('Cartons', 64, 'cartons'),
+      buildRow('Assembly', target, 'assembly'),
+      buildRow('Perso', target, 'perso'),
+      buildRow('Lasering', target, 'lasering'),
+      buildRow('Packaging (Meters)', target, 'packaging'),
+      buildRow('Cartons', Math.round(target / 10), 'cartons'),
       buildRow('Palets', 1, 'palets'),
     ];
 
@@ -89,10 +91,10 @@ export default function ProductionTable({
             <tr className="border-b border-teal-800/50 bg-teal-950/40">
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50">Step</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Target</th>
+              <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Total</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 1</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 2</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 3</th>
-              <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Total</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 text-center">%</th>
             </tr>
           </thead>
@@ -104,10 +106,10 @@ export default function ProductionTable({
                   {row.department}
                 </td>
                 <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.target}</td>
+                <td className="py-3 px-4 text-sm font-bold text-teal-100 text-center border-r border-teal-800/50 bg-teal-900/30">{row.total}</td>
                 <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift1}</td>
                 <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift2}</td>
                 <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift3}</td>
-                <td className="py-3 px-4 text-sm font-bold text-teal-100 text-center border-r border-teal-800/50 bg-teal-900/30">{row.total}</td>
                 <td className="py-3 px-4 text-center">
                   <span className={clsx(
                     "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
@@ -127,14 +129,14 @@ export default function ProductionTable({
 
   // Electricity
   const electricityProductionData = [
-    buildRow('Assembly', 640, 'assembly'),
-    buildRow('Insolation', 640, 'insolation'),
-    buildRow('Radiation Frequency', 640, 'radiation_frequency'),
-    buildRow('Calibration', 640, 'calibration'),
-    buildRow('Multy test', 640, 'multy_test'),
-    buildRow('Metrology', 640, 'metrology'),
-    buildRow('Perso', 640, 'perso'),
-    buildRow('Cards', 640, 'cards'),
+    buildRow('Assembly', target, 'assembly'),
+    buildRow('Insolation', target, 'insolation'),
+    buildRow('Radiation Frequency', target, 'radiation_frequency'),
+    buildRow('Calibration', target, 'calibration'),
+    buildRow('Multy test', target, 'multy_test'),
+    buildRow('Metrology', target, 'metrology'),
+    buildRow('Perso', target, 'perso'),
+    buildRow('Cards', target, 'cards'),
   ];
 
   return (
@@ -154,10 +156,10 @@ export default function ProductionTable({
           <tr className="border-b border-zinc-800 bg-zinc-900/80">
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800">Step</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Target</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Total</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 1</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 2</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 3</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Total</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-400 text-center">%</th>
           </tr>
         </thead>
@@ -169,10 +171,10 @@ export default function ProductionTable({
                 {row.department}
               </td>
               <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.target}</td>
+              <td className="py-3 px-4 text-sm font-bold text-white text-center border-r border-zinc-800 bg-zinc-800/30">{row.total}</td>
               <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift1}</td>
               <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift2}</td>
               <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift3}</td>
-              <td className="py-3 px-4 text-sm font-bold text-white text-center border-r border-zinc-800 bg-zinc-800/30">{row.total}</td>
               <td className="py-3 px-4 text-center">
                 <span className={clsx(
                   "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",

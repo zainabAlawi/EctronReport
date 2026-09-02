@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { division, filename, daysData } = body;
+    const { division, filename, daysData, uploaderName, target } = body;
 
     if (!division || !Array.isArray(daysData)) {
       return NextResponse.json({ error: 'Missing division or daysData' }, { status: 400 });
@@ -56,15 +56,17 @@ export async function POST(request: Request) {
     if (upsertError) throw upsertError;
 
     // Insert a single history record for this upload
-    // Take the date from the first record just as a reference, or use today's date for the upload event
+    const uploadDate = new Date().toISOString().split('T')[0];
+    const generatedFilename = `${uploadDate} - تقرير ${division === 'water' ? 'المياه' : 'الكهرباء'} السنوي`;
+
     const { error: historyError } = await supabase
       .from('production_history')
       .insert({
         division,
-        filename: filename || 'Yearly Report',
-        date: new Date().toISOString().split('T')[0], // The date this was uploaded
+        filename: generatedFilename,
+        date: uploadDate, // The date this was uploaded
         shift: 'official', // Mark as official
-        summary: summary,
+        summary: { ...summary, uploaderName, target },
         rows: bulkPayloads // Store the simplified daily payloads as rows for reference
       });
 

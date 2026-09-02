@@ -22,7 +22,8 @@ export async function GET(request: Request) {
       date: item.date,
       shift: item.shift,
       summary: item.summary,
-      rows: item.rows
+      rows: item.rows,
+      uploaderName: item.summary?.uploaderName || 'Unknown'
     }));
 
     return NextResponse.json({ history });
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { division, date, shift, rows, filename } = body;
+    const { division, date, shift, rows, filename, uploaderName, target } = body;
 
     if (!division || !date || !shift || !Array.isArray(rows)) {
       return NextResponse.json({ error: 'Missing division, date, shift, or rows' }, { status: 400 });
@@ -91,12 +92,29 @@ export async function POST(request: Request) {
         if (rowStr.includes('FINPALET') && rowStr.includes('BNR-INMC00097')) palets += val;
       }
     } else if (division === 'electricity') {
+      // Find the index/key for 'Nb Boards OK' from the headers
+      let okKey = '';
+      for (let i = 0; i < Math.min(20, rows.length); i++) {
+        for (const [key, val] of Object.entries(rows[i])) {
+          if (String(val).toUpperCase().trim().includes('NB BOARDS OK')) {
+            okKey = key;
+            break;
+          }
+        }
+        if (okKey) break;
+      }
+
       for (const row of rows) {
         const rowStr = JSON.stringify(row).toUpperCase();
         
-        // Find the column for "Nb Boards OK" dynamically in case of whitespace issues
-        const okKey = Object.keys(row).find(k => String(k).toUpperCase().includes('NB BOARDS OK')) || 'Nb Boards OK';
-        const val = parseInt(row[okKey]) || 0;
+        let val = 0;
+        if (okKey && row[okKey as keyof typeof row] !== undefined) {
+          val = parseInt(row[okKey as keyof typeof row] as string) || 0;
+        } else {
+          // Fallback if header not found: find the largest number in the row
+          const nums = Object.values(row).map(v => parseInt(v as string)).filter(v => !isNaN(v) && v > 0 && v < 10000);
+          val = nums.length > 0 ? Math.max(...nums) : 0;
+        }
 
         if (rowStr.includes('254100543S')) cards += val;
         if (rowStr.includes('BNR-INMC00004')) assembly += val;
@@ -107,6 +125,9 @@ export async function POST(request: Request) {
         if (rowStr.includes('BNR-NG6032')) metrology += val;
         if (rowStr.includes('BNR-INMC00003')) perso += val;
       }
+      
+      // Override cards to always equal assembly
+      cards = assembly;
     }
 
     const shiftKey = shift === 'all' ? 'shift1' : shift; 
@@ -135,17 +156,19 @@ export async function POST(request: Request) {
 
     if (upsertError) throw upsertError;
 
+    const generatedFilename = `${date} - تقرير ${division === 'water' ? 'المياه' : 'الكهرباء'} اليومي`;
+
     // Insert into production_history table
     const { error: historyError } = await supabase
       .from('production_history')
       .insert({
         division,
-        filename: filename || 'Unknown file',
+        filename: generatedFilename,
         date,
         shift,
         summary: division === 'water' 
-          ? { assembly, perso, lasering, packaging, cartons, palets }
-          : { cards, assembly, insolation, radiation_frequency, calibration, multy_test, metrology, perso },
+          ? { assembly, perso, lasering, packaging, cartons, palets, uploaderName, target }
+          : { cards, assembly, insolation, radiation_frequency, calibration, multy_test, metrology, perso, uploaderName, target },
         rows
       });
 

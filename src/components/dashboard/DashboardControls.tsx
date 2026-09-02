@@ -51,7 +51,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
             currentMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           )}
         >
-          <CalendarIcon className="w-4 h-4" />
+          <CalendarIcon className="w-4 h-4 text-white" />
           سنوي (Yearly)
         </Link>
       </div>
@@ -64,7 +64,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
               type="date" 
               value={currentDate}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="bg-zinc-900/50 border border-zinc-800 text-zinc-300 text-sm rounded-xl px-4 py-2 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+              className="bg-zinc-900/50 border border-zinc-800 text-zinc-300 text-sm rounded-xl px-4 py-2 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100"
             />
           </div>
         ) : (

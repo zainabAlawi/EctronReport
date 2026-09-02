@@ -15,6 +15,8 @@ export default function UploadPage() {
   const [shift, setShift] = useState('shift1');
   
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [uploaderName, setUploaderName] = useState('');
+  const [dailyTarget, setDailyTarget] = useState('640');
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
@@ -133,18 +135,25 @@ export default function UploadPage() {
           }
         }
         
+        // Override cards to always equal assembly for electricity
+        if (division === 'electricity') {
+          Object.keys(dailyData).forEach(dateKey => {
+            dailyData[dateKey].cards = dailyData[dateKey].assembly;
+          });
+        }
+        
         const daysData = Object.values(dailyData);
         
         const res = await fetch('/api/upload/yearly', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ division, filename: file.name, daysData })
+          body: JSON.stringify({ division, filename: file.name, daysData, uploaderName, target: parseInt(dailyTarget) || 640 })
         });
 
         if (!res.ok) throw new Error('Upload processing failed');
 
       } else {
-        const json = XLSX.utils.sheet_to_json(worksheet);
+        const json = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         const res = await fetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -153,7 +162,9 @@ export default function UploadPage() {
             date,
             shift: shiftType === 'official' ? 'official' : shift,
             rows: json,
-            filename: file.name
+            filename: file.name,
+            uploaderName,
+            target: parseInt(dailyTarget) || 640
           })
         });
 
@@ -229,7 +240,7 @@ export default function UploadPage() {
                 type="date" 
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+                className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100"
               />
             </div>
 
@@ -293,6 +304,30 @@ export default function UploadPage() {
             </div>
           </>
         )}
+
+        {/* Uploader Name & Target */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-zinc-300 mb-4 block">Uploader Name (اسم الشخص)</label>
+            <input 
+              type="text" 
+              placeholder="Enter your name..."
+              value={uploaderName}
+              onChange={(e) => setUploaderName(e.target.value)}
+              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-zinc-300 mb-4 block">Daily Target (الهدف اليومي)</label>
+            <input 
+              type="number" 
+              placeholder="e.g. 640"
+              value={dailyTarget}
+              onChange={(e) => setDailyTarget(e.target.value)}
+              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+            />
+          </div>
+        </div>
 
         {/* Drag and Drop Zone */}
         <div
@@ -385,10 +420,13 @@ export default function UploadPage() {
                   <div>
                     <h4 className="font-semibold text-white mb-1">{item.filename}</h4>
                     <div className="flex items-center gap-4 text-sm text-zinc-400">
-                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {item.date}</span>
+                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-white" /> {item.date}</span>
                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(item.timestamp).toLocaleTimeString()}</span>
                       <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-xs text-zinc-300 capitalize">{item.shift}</span>
                     </div>
+                    {item.uploaderName && item.uploaderName !== 'Unknown' && (
+                      <div className="text-xs text-zinc-500 mt-1">Uploaded by: <span className="text-zinc-300">{item.uploaderName}</span></div>
+                    )}
                   </div>
                 </div>
                 

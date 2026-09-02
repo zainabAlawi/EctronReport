@@ -4,10 +4,10 @@ import { supabase } from '@/lib/supabase';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
 import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart, YearlyGrowthChart } from '@/components/dashboard/Charts';
-import YearlyTable from '../yearly-production/YearlyTable';
 import Link from 'next/link';
 import { Calendar } from 'lucide-react';
 import DashboardControls from '@/components/dashboard/DashboardControls';
+import YearlyTable from '../yearly-production/YearlyTable';
 
 export default async function DashboardPage(props: {
   params: Promise<{ division: string }>;
@@ -39,6 +39,7 @@ export default async function DashboardPage(props: {
   
   let latestFileName = null;
   let latestFileTime = null;
+  let customTarget: number | null = null;
   
   try {
     const { data, error } = await supabase
@@ -62,7 +63,7 @@ export default async function DashboardPage(props: {
 
     const { data: latestFile } = await supabase
       .from('production_history')
-      .select('filename, created_at')
+      .select('filename, created_at, summary')
       .eq('division', division)
       .eq('date', selectedDate)
       .order('created_at', { ascending: false })
@@ -71,12 +72,15 @@ export default async function DashboardPage(props: {
     if (latestFile && latestFile.length > 0) {
       latestFileName = latestFile[0].filename;
       latestFileTime = new Date(latestFile[0].created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      if (latestFile[0].summary?.target) {
+        customTarget = latestFile[0].summary.target;
+      }
     }
   } catch (e: any) {
     console.error('Error fetching dashboard data from Supabase:', e?.message || e);
   }
 
-  const target = 6400; // Fixed target for now, can be made dynamic later
+  const target = customTarget || 640; // Use uploaded target, fallback to 640
   const remaining = Math.max(0, target - achieved);
   const efficiency = target > 0 ? Number(((achieved / target) * 100).toFixed(1)) : 0;
 
@@ -102,7 +106,7 @@ export default async function DashboardPage(props: {
 
   if (division === 'water') {
     chartCategories = ['Assembly', 'Perso', 'Lasering', 'Packaging (Meters)'];
-    chartTargetData = [6400, 6400, 6400, 6400];
+    chartTargetData = [target, target, target, target];
     let actAssembly = 0, actPerso = 0, actLasering = 0, actPackaging = 0;
     if (dataForDate) {
       Object.values(dataForDate).forEach((shiftData: any) => {
@@ -115,7 +119,7 @@ export default async function DashboardPage(props: {
     chartActualData = [actAssembly, actPerso, actLasering, actPackaging];
   } else {
     chartCategories = ['Assembly', 'Insolation', 'Calibration', 'Multy test', 'Metrology', 'Perso', 'Cards'];
-    chartTargetData = Array(7).fill(6400); 
+    chartTargetData = Array(7).fill(target); 
     let actAssembly = 0, actInsolation = 0, actCalibration = 0, actMultyTest = 0, actMetrology = 0, actPerso = 0, actCards = 0;
     if (dataForDate) {
       Object.values(dataForDate).forEach((shiftData: any) => {
@@ -131,6 +135,35 @@ export default async function DashboardPage(props: {
     chartActualData = [actAssembly, actInsolation, actCalibration, actMultyTest, actMetrology, actPerso, actCards];
   }
 
+  let last10ChartData: number[] = [];
+  let last10ChartDates: string[] = [];
+  
+  try {
+    const table = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+    const field = division === 'water' ? 'packaging' : 'multy_test';
+    
+    const { data: recentData } = await supabase
+      .from(table)
+      .select(`date, ${field}`)
+      .order('date', { ascending: false })
+      .limit(100);
+      
+    if (recentData) {
+      const groupedRecent: Record<string, number> = {};
+      recentData.forEach((d: any) => {
+        if (d.date) {
+          groupedRecent[d.date] = (groupedRecent[d.date] || 0) + (d[field] || 0);
+        }
+      });
+      const sortedDates = Object.keys(groupedRecent).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      const top10Dates = sortedDates.slice(-10);
+      last10ChartDates = top10Dates.map(d => d.slice(5)); // 'MM-DD'
+      last10ChartData = top10Dates.map(d => groupedRecent[d]);
+    }
+  } catch (e) {
+    console.error(`Error fetching last 10 days ${division} data:`, e);
+  }
+
   const isWarning = metrics.efficiency < 90;
   const isExcellent = metrics.achieved >= metrics.target;
 
@@ -139,22 +172,25 @@ export default async function DashboardPage(props: {
   const mode = searchParams.mode || 'daily';
   const year = searchParams.year || new Date().getFullYear().toString();
 
-  // If we need yearly data for the yearly mode
   let yearlyData: any[] = [];
   let allData: any[] = [];
   let flatData: any[] = [];
+  let yearlyAchieved = 0;
+  let yearlyTarget = 0;
 
   if (mode === 'yearly') {
     const { data: yData } = await supabase
       .from(targetTable)
       .select('*');
-    
+      
     allData = yData || [];
     yearlyData = allData.filter(d => d.date && d.date.startsWith(year));
-
-    // Group yearlyData for YearlyTable
-    const groupedData: Record<string, any> = {};
-    yearlyData.forEach(row => {
+    
+    if (allData.length > 0) {
+      // Group by date and sum
+      const groupedData: Record<string, any> = {};
+      
+      yearlyData.forEach(row => {
         if (!groupedData[row.date]) {
           if (division === 'water') {
             groupedData[row.date] = { date: row.date, assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0 };
@@ -180,9 +216,19 @@ export default async function DashboardPage(props: {
           groupedData[row.date].metrology += row.metrology || 0;
           groupedData[row.date].perso += row.perso || 0;
         }
-    });
-    flatData = Object.values(groupedData);
-    flatData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      });
+
+      flatData = Object.values(groupedData);
+      // Sort newest first
+      flatData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      flatData.forEach(row => {
+         if (row.date && row.date.startsWith(year)) {
+           yearlyAchieved += (division === 'water' ? row.packaging : row.multy_test) || 0;
+           yearlyTarget += target;
+         }
+      });
+    }
   }
 
   return (
@@ -197,11 +243,6 @@ export default async function DashboardPage(props: {
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
           <DashboardControls currentMode={mode} currentDate={selectedDate as string} currentYear={year} division={division} />
-          
-          <Link href={`/${division}/yearly-production`} className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium flex items-center gap-2 transition-colors">
-            <Calendar className="w-4 h-4" />
-            عرض تفاصيل السنة كاملة
-          </Link>
           
           {mode === 'daily' && isWarning && (
             <div className="px-4 py-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm font-medium flex items-center gap-2">
@@ -231,19 +272,25 @@ export default async function DashboardPage(props: {
                   date={selectedDate} 
                   latestFileName={latestFileName}
                   latestFileTime={latestFileTime}
+                  target={target}
                 />
               </div>
               
               <div className="glass rounded-2xl p-6 border border-border">
-                <h3 className="text-lg font-semibold text-white mb-6">Shift Production</h3>
-                <ShiftProductionChart data={shiftProductionData} />
+                <h3 className="text-lg font-semibold text-white mb-6">
+                  Production (Last 10 Days)
+                </h3>
+                <ShiftProductionChart 
+                  data={last10ChartData} 
+                  xAxisData={last10ChartDates.length > 0 ? last10ChartDates : undefined}
+                />
               </div>
             </div>
             
             <div className="flex flex-col gap-6">
               <div className="glass rounded-2xl p-6 border border-border">
                 <h3 className="text-lg font-semibold text-white mb-6">Achievement</h3>
-                <AchievementGauge efficiency={efficiency} />
+                <AchievementGauge achieved={metrics.achieved} target={metrics.target} />
               </div>
 
               <div className="glass rounded-2xl p-6 border border-border">
@@ -255,19 +302,24 @@ export default async function DashboardPage(props: {
         </>
       ) : (
         <div className="grid grid-cols-1 gap-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="glass rounded-2xl p-6 border border-border">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="glass rounded-2xl p-6 border border-border lg:col-span-2">
               <h3 className="text-lg font-semibold text-white mb-6">Yearly Aggregation by Month - {year}</h3>
               <MonthlyAggregationChart dbData={yearlyData} division={division} year={year} />
             </div>
             <div className="glass rounded-2xl p-6 border border-border">
-              <h3 className="text-lg font-semibold text-white mb-6">Overall Yearly Growth</h3>
-              <YearlyGrowthChart dbData={allData} division={division} />
+              <h3 className="text-lg font-semibold text-white mb-6">Yearly Achievement</h3>
+              <AchievementGauge achieved={yearlyAchieved} target={yearlyTarget} />
             </div>
           </div>
           
           <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Production Data - {year}</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">Overall Yearly Growth</h3>
+            <YearlyGrowthChart dbData={allData} division={division} />
+          </div>
+
+          <div className="glass rounded-2xl p-6 border border-border">
+            <h3 className="text-lg font-semibold text-white mb-6">Production History - {year}</h3>
             <YearlyTable data={flatData} division={division} />
           </div>
         </div>

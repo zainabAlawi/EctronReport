@@ -2,12 +2,12 @@
 
 import ReactECharts from 'echarts-for-react';
 
-export function ShiftProductionChart({ data }: { data: number[] }) {
+export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxisData?: string[] }) {
   const options = {
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'category',
-      data: ['Shift 1', 'Shift 2', 'Shift 3', 'Official'],
+      data: xAxisData || ['Shift 1', 'Shift 2', 'Shift 3', 'Official'],
       axisLabel: { color: '#a1a1aa' },
     },
     yAxis: {
@@ -71,7 +71,7 @@ export function TargetVsActualChart({ categories, targetData, actualData }: { ca
   return <ReactECharts option={options} style={{ height: '300px' }} />;
 }
 
-export function AchievementGauge({ efficiency }: { efficiency: number }) {
+export function AchievementGauge({ achieved, target }: { achieved: number, target: number }) {
   const options = {
     series: [
       {
@@ -81,7 +81,7 @@ export function AchievementGauge({ efficiency }: { efficiency: number }) {
         center: ['50%', '75%'],
         radius: '100%',
         min: 0,
-        max: 100,
+        max: 1000,
         splitNumber: 10,
         axisLine: {
           lineStyle: {
@@ -100,8 +100,8 @@ export function AchievementGauge({ efficiency }: { efficiency: number }) {
         splitLine: { length: 20, lineStyle: { color: 'auto', width: 5 } },
         axisLabel: { color: '#a1a1aa', distance: -60, fontSize: 14 },
         title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: '#a1a1aa' } },
-        detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}%', color: 'auto' },
-        data: [{ value: efficiency, name: 'Efficiency' }]
+        detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}', color: 'auto' },
+        data: [{ value: achieved, name: 'Achieved' }]
       }
     ]
   };
