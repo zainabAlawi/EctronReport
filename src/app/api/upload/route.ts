@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const division = searchParams.get('division') || 'water';
   
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (await createClient())
       .from('production_history')
       .select('*')
       .eq('division', division)
@@ -150,7 +150,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, message: 'File processed but data is all zeros (ignored)' });
     }
 
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await (await createClient())
       .from(targetTable)
       .upsert(payload as any, { onConflict: 'date,shift' });
 
@@ -159,7 +159,7 @@ export async function POST(request: Request) {
     const generatedFilename = `${date} - تقرير ${division === 'water' ? 'المياه' : 'الكهرباء'} اليومي`;
 
     // Insert into production_history table
-    const { error: historyError } = await supabase
+    const { error: historyError } = await (await createClient())
       .from('production_history')
       .insert({
         division,
@@ -189,7 +189,7 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: 'Missing ID' }, { status: 400 });
 
     // Fetch the history record to know which daily_production row to delete
-    const { data: historyData, error: fetchError } = await supabase
+    const { data: historyData, error: fetchError } = await (await createClient())
       .from('production_history')
       .select('date, shift, division')
       .eq('id', id)
@@ -202,7 +202,7 @@ export async function DELETE(request: Request) {
     const { date, shift, division } = historyData;
 
     // Delete from history
-    const { error: deleteHistoryError } = await supabase
+    const { error: deleteHistoryError } = await (await createClient())
       .from('production_history')
       .delete()
       .eq('id', id);
@@ -213,7 +213,7 @@ export async function DELETE(request: Request) {
     const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
     const shiftKey = shift === 'all' ? 'shift1' : shift; 
 
-    const { error: deleteDailyError } = await supabase
+    const { error: deleteDailyError } = await (await createClient())
       .from(targetTable)
       .delete()
       .eq('date', date)

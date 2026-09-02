@@ -1,8 +1,16 @@
 'use client';
 
-import { Search, Bell, User } from 'lucide-react';
+import { Search, Bell } from 'lucide-react';
 
-export default function TopNav() {
+interface TopNavProps {
+  profile?: any;
+  roleName?: string;
+}
+
+export default function TopNav({ profile, roleName }: TopNavProps) {
+  const fullName = profile?.full_name || 'Unknown User';
+  const displayInitial = fullName.charAt(0).toUpperCase();
+
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-30 glass">
       <div className="flex items-center flex-1 max-w-2xl gap-4">
@@ -24,11 +32,11 @@ export default function TopNav() {
         
         <div className="flex items-center gap-3 pl-4 border-l border-zinc-800">
           <div className="flex flex-col items-end">
-            <span className="text-sm font-medium text-zinc-200">Admin User</span>
-            <span className="text-xs text-emerald-400">Online</span>
+            <span className="text-sm font-medium text-zinc-200">{fullName}</span>
+            <span className="text-xs text-blue-400">{roleName || 'Guest'}</span>
           </div>
-          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold">
-            A
+          <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500 flex items-center justify-center text-white font-semibold shadow-inner">
+            {displayInitial}
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import YearlyTable from './YearlyTable';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react';
 export default async function YearlyProductionPage(props: { params: Promise<{ division: string }> }) {
   const params = await props.params;
   const division = params.division;
+  const supabase = await createClient();
 
   let flatData: any[] = [];
 

@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
 import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart, YearlyGrowthChart } from '@/components/dashboard/Charts';
 import Link from 'next/link';
-import { Calendar } from 'lucide-react';
+import { CalendarIcon } from 'lucide-react';
 import DashboardControls from '@/components/dashboard/DashboardControls';
 import YearlyTable from '../yearly-production/YearlyTable';
 
@@ -17,6 +17,7 @@ export default async function DashboardPage(props: {
   const params = await props.params;
   const division = params.division;
   const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+  const supabase = await createClient();
   
   let selectedDate = searchParams.date;
   if (!selectedDate) {

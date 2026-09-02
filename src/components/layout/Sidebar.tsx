@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { 
   Home, 
   LayoutDashboard, 
@@ -9,28 +9,52 @@ import {
   UploadCloud, 
   BrainCircuit,
   Settings,
-  LogOut
+  LogOut,
+  Users
 } from 'lucide-react';
 import clsx from 'clsx';
+import { createClient } from '@/lib/supabase';
 
-const navItems = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Reports', href: '/reports', icon: FileText },
-  { name: 'Upload Data', href: '/upload', icon: UploadCloud },
-  { name: 'AI Analysis', href: '/analysis', icon: BrainCircuit },
-];
+interface SidebarProps {
+  userPermissions?: string[];
+  roleName?: string;
+}
 
-export default function Sidebar() {
+export default function Sidebar({ userPermissions = [], roleName = '' }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   
   // Extract division from pathname (e.g. /water/dashboard -> water)
   const parts = pathname.split('/');
-  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity') ? parts[1] : '';
+  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity') ? parts[1] : 'electricity'; // Default to electricity
+
+  const hasPermission = (key: string) => {
+    if (roleName === 'Admin') return true;
+    return userPermissions.includes(key);
+  };
+
+  const navItems = [
+    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `${division}_dashboard` },
+    { name: 'Reports', href: '/reports', icon: FileText, permission: `${division}_reports` },
+    { name: 'Upload Data', href: '/upload', icon: UploadCloud, permission: `${division}_daily_entry` },
+    { name: 'AI Analysis', href: '/analysis', icon: BrainCircuit, permission: `${division}_reports` },
+  ];
+
+  // Admin items
+  if (roleName === 'Admin' || userPermissions.includes('admin_panel')) {
+    navItems.push({ name: 'Admin Panel', href: '/admin/users', icon: Users, permission: 'admin_panel' });
+  }
 
   const getHref = (baseHref: string) => {
-    if (baseHref === '/') return '/';
+    if (baseHref.startsWith('/admin')) return baseHref;
     return division ? `/${division}${baseHref}` : baseHref;
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/login');
+    router.refresh();
   };
 
   return (
@@ -43,6 +67,8 @@ export default function Sidebar() {
       
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
+          if (item.permission && !hasPermission(item.permission)) return null;
+
           const href = getHref(item.href);
           const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));
           const Icon = item.icon;
@@ -70,7 +96,10 @@ export default function Sidebar() {
           <Settings className="w-5 h-5" />
           Settings
         </button>
-        <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-danger hover:bg-danger/10 w-full transition-all duration-200 mt-1">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-zinc-400 hover:text-danger hover:bg-danger/10 w-full transition-all duration-200 mt-1"
+        >
           <LogOut className="w-5 h-5" />
           Logout
         </button>

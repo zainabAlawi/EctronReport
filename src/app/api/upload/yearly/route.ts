@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 
 export async function POST(request: Request) {
   try {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
     // Upsert all days
     // Supabase JS client supports bulk upsert arrays
-    const { error: upsertError } = await supabase
+    const { error: upsertError } = await (await createClient())
       .from(targetTable)
       .upsert(bulkPayloads, { onConflict: 'date,shift' });
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     const uploadDate = new Date().toISOString().split('T')[0];
     const generatedFilename = `${uploadDate} - تقرير ${division === 'water' ? 'المياه' : 'الكهرباء'} السنوي`;
 
-    const { error: historyError } = await supabase
+    const { error: historyError } = await (await createClient())
       .from('production_history')
       .insert({
         division,
