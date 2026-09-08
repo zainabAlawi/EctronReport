@@ -512,28 +512,7 @@ export default function UploadPage() {
 
               {/* Full Data Table */}
               <h4 className="font-semibold text-white mb-4">Raw Data Rows</h4>
-              <div className="rounded-xl border border-border overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-400 border-b border-border">
-                      <tr>
-                        {selectedHistory.rows.length > 0 && Object.keys(selectedHistory.rows[0]).map(key => (
-                          <th key={key} className="px-6 py-4 font-medium whitespace-nowrap">{key}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border/50">
-                      {selectedHistory.rows.map((row: any, i: number) => (
-                        <tr key={i} className="bg-transparent hover:bg-white/5 transition-colors">
-                          {Object.values(row).map((val: any, j: number) => (
-                            <td key={j} className="px-6 py-3 text-zinc-300">{val}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+              <FormattedDataTable rows={selectedHistory.rows} />
             </div>
           </div>
         </div>
@@ -541,3 +520,131 @@ export default function UploadPage() {
     </div>
   );
 }
+
+const FormattedDataTable = ({ rows }: { rows: any[] }) => {
+  if (!rows || rows.length === 0) return null;
+
+  const formattedRows = rows.map((row, idx) => {
+    const keys = Object.keys(row);
+    const getVal = (keywords: string[]) => {
+      const k = keys.find(key => keywords.some(kw => key.toUpperCase().includes(kw.toUpperCase())));
+      return k ? row[k] : undefined;
+    };
+    
+    // Station
+    let stationName = getVal(['STATION', 'NAME', 'OPERATION', 'المحطة', 'DESIGNATION']);
+    if (!stationName) {
+      // Find the first string that looks like a name
+      stationName = Object.values(row).find(v => typeof v === 'string' && v.match(/[a-zA-Z]/) && !String(v).includes('BNR-')) || 'Unknown Station';
+    }
+    
+    let code = getVal(['CODE', 'REFERENCE', 'ARTICLE']);
+    if (!code) {
+      code = Object.values(row).find(v => typeof v === 'string' && String(v).includes('BNR-')) || '';
+    }
+
+    // Numbers
+    let passed = parseInt(getVal(['OK', 'PASS', 'GOOD', 'ناجح']) as string);
+    let failed = parseInt(getVal(['KO', 'FAIL', 'DEFECT', 'رسب']) as string);
+    // Find input safely without matching 'OK' or 'KO'
+    let inputKey = keys.find(k => {
+      const up = k.toUpperCase();
+      return (up.includes('BOARD') || up.includes('INPUT') || up.includes('ENTRANT') || up.includes('دخل')) && !up.includes('OK') && !up.includes('KO');
+    });
+    let input = parseInt(inputKey ? row[inputKey] : undefined);
+    
+    let tests = parseInt(getVal(['TESTS', 'TOTAL', 'مرات']) as string);
+
+    if (isNaN(passed)) passed = 0;
+    if (isNaN(failed)) failed = 0;
+    if (isNaN(input)) {
+      if (passed > 0 || failed > 0) input = passed + failed;
+      else input = 0;
+    }
+    if (isNaN(tests)) {
+      if (input > 0) tests = input;
+      else tests = passed + failed;
+    }
+
+    let fpy = input > 0 ? ((passed / input) * 100).toFixed(2) : '0.00';
+
+    return { id: idx, stationName, code, tests, input, passed, failed, fpy };
+  }).filter(r => r.input > 0 || r.passed > 0 || r.failed > 0 || r.tests > 0);
+
+  if (formattedRows.length === 0) {
+    // Fallback to raw table if we couldn't parse anything meaningful
+    return (
+      <div className="rounded-xl border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-400 border-b border-border">
+              <tr>
+                {Object.keys(rows[0]).map(key => (
+                  <th key={key} className="px-6 py-4 font-medium whitespace-nowrap">{key}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {rows.map((row: any, i: number) => (
+                <tr key={i} className="bg-transparent hover:bg-white/5 transition-colors">
+                  {Object.values(row).map((val: any, j: number) => (
+                    <td key={j} className="px-6 py-3 text-zinc-300">{String(val)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full bg-white rounded-xl overflow-hidden text-zinc-800 shadow-sm border border-slate-200">
+      <div className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+           <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">{formattedRows.length} محطات</span>
+        </div>
+        <h3 className="font-bold text-slate-700 text-lg">تفاصيل المحطات (التدفق والإنتاجية)</h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-center" dir="rtl">
+          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[13px]">
+            <tr>
+              <th className="px-4 py-4 text-right whitespace-nowrap w-[200px]">المحطة</th>
+              <th className="px-4 py-4 whitespace-nowrap">مرات الفحص</th>
+              <th className="px-4 py-4 whitespace-nowrap">اللي دخل</th>
+              <th className="px-4 py-4 whitespace-nowrap">كم طلع ناجح</th>
+              <th className="px-4 py-4 whitespace-nowrap">كم رسب</th>
+              <th className="px-4 py-4 whitespace-nowrap">نسبة النجاح من أول مرة</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {formattedRows.map((row, i) => (
+              <tr key={i} className="hover:bg-slate-50/50 transition-colors bg-white">
+                <td className="px-4 py-3 text-right">
+                  <div className="font-bold text-slate-800 text-[14px]">{row.stationName}</div>
+                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{row.code}</div>
+                </td>
+                <td className="px-4 py-3 font-medium text-slate-500">{row.tests}</td>
+                <td className="px-4 py-3 font-bold text-slate-800">{row.input}</td>
+                <td className="px-4 py-3 font-bold text-emerald-600">{row.passed}</td>
+                <td className="px-4 py-3 font-bold text-red-500">{row.failed}</td>
+                <td className="px-4 py-3">
+                  <span className={clsx(
+                    "px-3 py-1.5 rounded-full text-[12px] font-bold border inline-block min-w-[60px]",
+                    parseFloat(row.fpy) >= 95 ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
+                    parseFloat(row.fpy) >= 80 ? "bg-amber-50 text-amber-600 border-amber-200" :
+                    "bg-red-50 text-red-500 border-red-200"
+                  )}>
+                    {row.fpy}%
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
