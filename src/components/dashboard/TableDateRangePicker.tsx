@@ -12,12 +12,6 @@ export default function TableDateRangePicker() {
   const [startDate, setStartDate] = useState(searchParams.get('startDate') || '');
   const [endDate, setEndDate] = useState(searchParams.get('endDate') || '');
 
-  // Initialize dates on mount if missing
-  useEffect(() => {
-    if (!searchParams.get('startDate') && !searchParams.get('endDate')) {
-      handleFilterChange('today');
-    }
-  }, []);
 
   const updateUrl = (start: string, end: string, filter: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -65,6 +59,14 @@ export default function TableDateRangePicker() {
       updateUrl(start, end, val);
     }
   };
+
+  // Initialize dates on mount if missing
+  useEffect(() => {
+    if (!searchParams.get('startDate') && !searchParams.get('endDate')) {
+      handleFilterChange('today');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleStartDateChange = (val: string) => {
     setStartDate(val);

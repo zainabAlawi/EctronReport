@@ -50,7 +50,7 @@ export default function ProductionTable({
   const dayString = dateRangeDisplay ? 'Selected Range' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
   const dateString = dateRangeDisplay || dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
 
-  const LastUploadedHeader = () => {
+  const renderLastUploadedHeader = () => {
     if (!latestFileName) return null;
     return (
       <div className="mb-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-between text-sm">
@@ -78,7 +78,7 @@ export default function ProductionTable({
 
     return (
       <div className="flex flex-col gap-4">
-        <LastUploadedHeader />
+        {renderLastUploadedHeader()}
         <div className="w-full overflow-x-auto rounded-xl border border-teal-800/30">
           <table className="w-full text-left border-collapse">
           <thead>
@@ -143,7 +143,7 @@ export default function ProductionTable({
 
   return (
     <div className="flex flex-col gap-4">
-      <LastUploadedHeader />
+      {renderLastUploadedHeader()}
       <div className="w-full overflow-x-auto rounded-xl border border-zinc-800">
         <table className="w-full text-left border-collapse">
         <thead>
