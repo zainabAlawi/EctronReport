@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Download, Printer } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
+import ProductionTable from '@/components/dashboard/ProductionTable';
 
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -18,6 +19,10 @@ export default function ReportsPage() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth().toString());
 
+  const [dateFilter, setDateFilter] = useState('today');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
   const years = ['2023', '2024', '2025', '2026', '2027'];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -30,21 +35,48 @@ export default function ReportsPage() {
     fetchData();
   }, [division]);
 
-  let latestDate = new Date().toISOString().split('T')[0];
-  if (dbData.length > 0) {
-    const dates = [...new Set(dbData.map(d => d.date))].sort().reverse();
-    if (dates.length > 0) latestDate = dates[0];
-  }
-  
+  useEffect(() => {
+    const today = new Date();
+    
+    // Helper to format date as YYYY-MM-DD local time correctly
+    const formatDate = (d: Date) => {
+      const offset = d.getTimezoneOffset();
+      const adjustedDate = new Date(d.getTime() - (offset*60*1000));
+      return adjustedDate.toISOString().split('T')[0];
+    };
+
+    if (dateFilter === 'today') {
+      const str = formatDate(today);
+      setStartDate(str);
+      setEndDate(str);
+    } else if (dateFilter === 'yesterday') {
+      const d = new Date(today);
+      d.setDate(d.getDate() - 1);
+      const str = formatDate(d);
+      setStartDate(str);
+      setEndDate(str);
+    } else if (dateFilter === 'last_week') {
+      const start = new Date(today);
+      start.setDate(start.getDate() - 7);
+      setStartDate(formatDate(start));
+      setEndDate(formatDate(today));
+    } else if (dateFilter === 'this_month') {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      setStartDate(formatDate(start));
+      setEndDate(formatDate(today));
+    }
+  }, [dateFilter]);
+
   const [latestTarget, setLatestTarget] = useState(640);
 
   useEffect(() => {
     async function fetchHistoryTarget() {
+      const dateToUse = endDate || new Date().toISOString().split('T')[0];
       const { data } = await supabase
         .from('production_history')
         .select('summary')
         .eq('division', division)
-        .eq('date', latestDate)
+        .eq('date', dateToUse)
         .order('created_at', { ascending: false })
         .limit(1);
       
@@ -53,25 +85,62 @@ export default function ReportsPage() {
       }
     }
     fetchHistoryTarget();
-  }, [division, latestDate]);
+  }, [division, endDate]);
 
-  const dailyData = dbData.filter(d => d.date === latestDate);
-  
-  const todayTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
-  dailyData.forEach(d => {
-    todayTotals.assembly += d.assembly || 0;
-    todayTotals.perso += d.perso || 0;
-    todayTotals.lasering += d.lasering || 0;
-    todayTotals.packaging += d.packaging || 0;
-    todayTotals.cartons += d.cartons || 0;
-    todayTotals.palets += d.palets || 0;
-    todayTotals.cards += d.cards || 0;
-    todayTotals.insolation += d.insolation || 0;
-    todayTotals.radiation_frequency += d.radiation_frequency || 0;
-    todayTotals.calibration += d.calibration || 0;
-    todayTotals.multy_test += d.multy_test || 0;
-    todayTotals.metrology += d.metrology || 0;
+  const dailyData = dbData.filter(d => {
+    if (!startDate || !endDate) return false;
+    return d.date >= startDate && d.date <= endDate;
   });
+  
+  const shiftTotals = {
+    shift1: {} as any,
+    shift2: {} as any,
+    shift3: {} as any,
+    official: {} as any
+  };
+
+  const todayTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
+  
+  dailyData.forEach(d => {
+    // Totals for summary and steps efficiency
+    todayTotals.assembly += (d.assembly || 0);
+    todayTotals.perso += (d.perso || 0);
+    todayTotals.lasering += (d.lasering || 0);
+    todayTotals.packaging += (d.packaging || 0);
+    todayTotals.cartons += (d.cartons || 0);
+    todayTotals.palets += (d.palets || 0);
+    todayTotals.cards += (d.cards || 0);
+    todayTotals.insolation += (d.insolation || 0);
+    todayTotals.radiation_frequency += (d.radiation_frequency || 0);
+    todayTotals.calibration += (d.calibration || 0);
+    todayTotals.multy_test += (d.multy_test || 0);
+    todayTotals.metrology += (d.metrology || 0);
+
+    // Totals per shift for ProductionTable
+    const s = d.shift || 'official';
+    if (shiftTotals[s as keyof typeof shiftTotals]) {
+      const targetShift = shiftTotals[s as keyof typeof shiftTotals];
+      targetShift.assembly = (targetShift.assembly || 0) + (d.assembly || 0);
+      targetShift.perso = (targetShift.perso || 0) + (d.perso || 0);
+      targetShift.lasering = (targetShift.lasering || 0) + (d.lasering || 0);
+      targetShift.packaging = (targetShift.packaging || 0) + (d.packaging || 0);
+      targetShift.cartons = (targetShift.cartons || 0) + (d.cartons || 0);
+      targetShift.palets = (targetShift.palets || 0) + (d.palets || 0);
+      targetShift.cards = (targetShift.cards || 0) + (d.cards || 0);
+      targetShift.insolation = (targetShift.insolation || 0) + (d.insolation || 0);
+      targetShift.radiation_frequency = (targetShift.radiation_frequency || 0) + (d.radiation_frequency || 0);
+      targetShift.calibration = (targetShift.calibration || 0) + (d.calibration || 0);
+      targetShift.multy_test = (targetShift.multy_test || 0) + (d.multy_test || 0);
+      targetShift.metrology = (targetShift.metrology || 0) + (d.metrology || 0);
+    }
+  });
+
+  // Calculate total target across the date range
+  const d1 = new Date(startDate);
+  const d2 = new Date(endDate);
+  const diffTime = Math.abs(d2.getTime() - d1.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
+  const rangeTarget = latestTarget * (diffDays || 1);
 
   return (
     <div className="flex flex-col gap-6">
@@ -111,6 +180,44 @@ export default function ReportsPage() {
           ))}
         </div>
 
+        {activeTab === 'Daily' && (
+          <div className="flex items-center gap-3 bg-zinc-900/50 p-2 rounded-xl border border-zinc-800 flex-wrap">
+            <select 
+              value={dateFilter}
+              onChange={e => setDateFilter(e.target.value)}
+              className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+            >
+              <option value="today">اليوم (Today)</option>
+              <option value="yesterday">أمس (Yesterday)</option>
+              <option value="last_week">الأسبوع الأخير (Last Week)</option>
+              <option value="this_month">هذا الشهر (This Month)</option>
+              <option value="custom">تحديد فترة (Custom)</option>
+            </select>
+
+            <div className="flex items-center gap-2">
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={e => {
+                  setStartDate(e.target.value);
+                  setDateFilter('custom');
+                }}
+                className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+              />
+              <span className="text-zinc-500">-</span>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={e => {
+                  setEndDate(e.target.value);
+                  setDateFilter('custom');
+                }}
+                className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+              />
+            </div>
+          </div>
+        )}
+
         {(activeTab === 'Weekly' || activeTab === 'Monthly') && (
           <div className="flex items-center gap-3 bg-zinc-900/50 p-2 rounded-xl border border-zinc-800">
             <select 
@@ -135,7 +242,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="glass rounded-2xl p-6 border border-border min-h-[400px]">
-        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={latestDate} target={latestTarget} />}
+        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={startDate === endDate ? startDate : `${startDate} to ${endDate}`} target={rangeTarget} shiftData={shiftTotals} />}
         {activeTab === 'Weekly' && <WeeklyReport dbData={dbData} division={division} year={selectedYear} month={selectedMonth} />}
         {activeTab === 'Monthly' && <MonthlyReport dbData={dbData} division={division} year={selectedYear} />}
         {activeTab === 'Yearly' && <YearlyReport dbData={dbData} division={division} />}
@@ -144,7 +251,7 @@ export default function ReportsPage() {
   );
 }
 
-function DailyReport({ division, totals, date, target }: { division: string, totals: any, date: string, target: number }) {
+function DailyReport({ division, totals, date, target, shiftData }: { division: string, totals: any, date: string, target: number, shiftData: any }) {
   const isWater = division === 'water';
   
   const achieved = isWater ? totals.packaging : totals.multy_test;
@@ -196,6 +303,17 @@ function DailyReport({ division, totals, date, target }: { division: string, tot
             <StepBox name="Perso" value={formatStep(totals.perso)} status={getStatus(totals.perso)} />
           </div>
         )}
+      </div>
+      
+      <div className="mt-8">
+        <h4 className="text-sm text-zinc-400 mb-3 font-medium">Detailed Production Table</h4>
+        <ProductionTable 
+          type={division as 'water' | 'electricity'} 
+          dynamicWaterData={shiftData}
+          dateRangeDisplay={date.includes('to') ? date : undefined}
+          date={!date.includes('to') ? date : undefined}
+          target={target}
+        />
       </div>
     </div>
   );

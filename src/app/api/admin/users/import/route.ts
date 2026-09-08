@@ -20,16 +20,17 @@ export async function POST(request: Request) {
 
     for (const u of users) {
       try {
-        const email = u.username.includes('@') ? u.username : `${u.username}@ectron.local`;
+        const usernameStr = String(u.username);
+        const email = usernameStr.includes('@') ? usernameStr : `${usernameStr}@ectron.local`;
         const role_id = roleMap[u.user_type?.toLowerCase()] || roleMap['employee'];
 
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email,
-          password: u.password,
+          password: String(u.password),
           email_confirm: true,
           user_metadata: {
-            username: u.username,
-            full_name: u.name,
+            username: usernameStr,
+            full_name: String(u.full_name || u.name || ''),
           }
         });
 

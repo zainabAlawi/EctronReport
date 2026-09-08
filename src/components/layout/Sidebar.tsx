@@ -33,7 +33,10 @@ export default function Sidebar({ userPermissions = [], roleName = '' }: Sidebar
     return userPermissions.includes(key);
   };
 
+  const isHome = pathname === '/home';
+  
   const navItems = [
+    { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `${division}_dashboard` },
     { name: 'Reports', href: '/reports', icon: FileText, permission: `${division}_reports` },
     { name: 'Upload Data', href: '/upload', icon: UploadCloud, permission: `${division}_daily_entry` },
@@ -46,14 +49,14 @@ export default function Sidebar({ userPermissions = [], roleName = '' }: Sidebar
   }
 
   const getHref = (baseHref: string) => {
-    if (baseHref.startsWith('/admin')) return baseHref;
+    if (baseHref.startsWith('/admin') || baseHref === '/home') return baseHref;
     return division ? `/${division}${baseHref}` : baseHref;
   };
 
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push('/login');
+    router.push('/');
     router.refresh();
   };
 
@@ -61,13 +64,17 @@ export default function Sidebar({ userPermissions = [], roleName = '' }: Sidebar
     <aside className="w-64 h-screen bg-card border-r border-border flex flex-col glass fixed left-0 top-0 z-40">
       <div className="h-16 flex items-center px-6 border-b border-border">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent flex gap-2">
-          ECTRON Smart <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">{division}</span>
+          ECTRON Smart 
+          {!isHome && !pathname.startsWith('/admin') && (
+            <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">{division}</span>
+          )}
         </h1>
       </div>
       
       <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
           if (item.permission && !hasPermission(item.permission)) return null;
+          if (isHome && !item.showAlways && !item.href.startsWith('/admin')) return null;
 
           const href = getHref(item.href);
           const isActive = pathname === href || (href !== '/' && pathname.startsWith(href));

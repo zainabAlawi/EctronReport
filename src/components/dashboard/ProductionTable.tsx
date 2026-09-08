@@ -18,14 +18,16 @@ export default function ProductionTable({
   date,
   latestFileName,
   latestFileTime,
-  target = 640
+  target = 640,
+  dateRangeDisplay
 }: { 
   type?: 'water' | 'electricity',
   dynamicWaterData?: any,
   date?: string,
   latestFileName?: string | null,
   latestFileTime?: string | null,
-  target?: number
+  target?: number,
+  dateRangeDisplay?: string
 }) {
   const shifts = dynamicWaterData || {
     shift1: {},
@@ -45,8 +47,8 @@ export default function ProductionTable({
   };
 
   const dateObj = date ? new Date(date) : new Date();
-  const dayString = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
-  const dateString = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
+  const dayString = dateRangeDisplay ? 'Selected Range' : dateObj.toLocaleDateString('en-US', { weekday: 'long' });
+  const dateString = dateRangeDisplay || dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-');
 
   const LastUploadedHeader = () => {
     if (!latestFileName) return null;

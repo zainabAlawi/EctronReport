@@ -1,6 +1,9 @@
 import { createClient } from '@/lib/supabase-server';
 import RolesTable from './RolesTable';
 
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
 export default async function RolesPage() {
   const supabase = await createClient();
 
@@ -22,9 +25,13 @@ export default async function RolesPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">Role Management</h1>
+          <h1 className="text-2xl font-bold text-white">إدارة الصلاحيات (Role Management)</h1>
           <p className="text-zinc-400 text-sm mt-1">Configure default access permissions for each user type</p>
         </div>
+        <Link href="/admin/users" className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-medium transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          العودة للمستخدمين
+        </Link>
       </div>
 
       <div className="glass rounded-2xl border border-border p-6 overflow-hidden">

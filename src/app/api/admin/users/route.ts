@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase-admin';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { username, password, full_name, role_id, custom_permissions } = body;
+    const { username, password, full_name, role_id, is_active, custom_permissions } = body;
     const email = username.includes('@') ? username : `${username}@ectron.local`;
 
     const supabase = createAdminClient();
@@ -22,12 +22,17 @@ export async function POST(request: Request) {
 
     if (authError) throw authError;
 
-    // The trigger will automatically create a profile. We just need to update it with the specific role_id
+    // Upsert the profile to guarantee it exists and has the correct role
     if (authData.user) {
       await supabase
         .from('profiles')
-        .update({ role_id })
-        .eq('id', authData.user.id);
+        .upsert({ 
+          id: authData.user.id,
+          username,
+          full_name,
+          role_id,
+          is_active: is_active !== undefined ? is_active : true
+        });
         
       // Add custom permissions if any
       if (custom_permissions && custom_permissions.length > 0) {
@@ -43,7 +48,7 @@ export async function POST(request: Request) {
       // Fetch the complete user object to return
       const { data: newUser } = await supabase
         .from('profiles')
-        .select('id, username, full_name, is_active, roles(id, name)')
+        .select('id, username, full_name, is_active, roles(id, name), user_permissions ( permissions ( page_key ) )')
         .eq('id', authData.user.id)
         .single();
         
@@ -59,7 +64,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { id, username, password, full_name, role_id, custom_permissions } = body;
+    const { id, username, password, full_name, role_id, is_active, custom_permissions } = body;
     const email = username.includes('@') ? username : `${username}@ectron.local`;
 
     const supabase = createAdminClient();
@@ -75,9 +80,12 @@ export async function PUT(request: Request) {
     if (authError) throw authError;
 
     // Update Profile
+    const profileUpdate: any = { username, full_name, role_id };
+    if (is_active !== undefined) profileUpdate.is_active = is_active;
+    
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ username, full_name, role_id })
+      .update(profileUpdate)
       .eq('id', id);
     if (profileError) throw profileError;
 
@@ -94,7 +102,7 @@ export async function PUT(request: Request) {
 
     const { data: updatedUser } = await supabase
       .from('profiles')
-      .select('id, username, full_name, is_active, roles(id, name)')
+      .select('id, username, full_name, is_active, roles(id, name), user_permissions ( permissions ( page_key ) )')
       .eq('id', id)
       .single();
 

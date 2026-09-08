@@ -1,6 +1,8 @@
 'use client';
 
-import { Search, Bell } from 'lucide-react';
+import { Search, Bell, LogOut } from 'lucide-react';
+import { createClient } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 interface TopNavProps {
   profile?: any;
@@ -8,8 +10,16 @@ interface TopNavProps {
 }
 
 export default function TopNav({ profile, roleName }: TopNavProps) {
-  const fullName = profile?.full_name || 'Unknown User';
+  const fullName = profile?.full_name || 'User';
   const displayInitial = fullName.charAt(0).toUpperCase();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push('/');
+    router.refresh();
+  };
 
   return (
     <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-30 glass">
@@ -33,11 +43,19 @@ export default function TopNav({ profile, roleName }: TopNavProps) {
         <div className="flex items-center gap-3 pl-4 border-l border-zinc-800">
           <div className="flex flex-col items-end">
             <span className="text-sm font-medium text-zinc-200">{fullName}</span>
-            <span className="text-xs text-blue-400">{roleName || 'Guest'}</span>
+            <span className="text-xs text-blue-400">{roleName || 'User'}</span>
           </div>
           <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-500 flex items-center justify-center text-white font-semibold shadow-inner">
             {displayInitial}
           </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="ml-2 p-2 rounded-full hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors"
+            title="تسجيل الخروج (Logout)"
+          >
+            <LogOut className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>

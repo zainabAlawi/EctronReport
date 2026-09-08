@@ -31,7 +31,7 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/login');
+  const isAuthRoute = request.nextUrl.pathname === '/';
   
   // Exclude static assets and api endpoints that shouldn't be protected by UI redirects
   if (
@@ -42,24 +42,20 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // Redirect to login if user is not authenticated
+  // Redirect to login (root /) if user is not authenticated and not already on the login page
   if (!user && !isAuthRoute) {
     const url = request.nextUrl.clone();
-    url.pathname = '/login';
+    url.pathname = '/';
     return NextResponse.redirect(url);
   }
 
-  // Redirect to dashboard if user is authenticated and tries to access login page
+  // Redirect to dashboard (/home) if user is authenticated and tries to access login page (root /)
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
-    // Usually redirect to default dashboard
-    url.pathname = '/electricity/dashboard';
+    url.pathname = '/home';
     return NextResponse.redirect(url);
   }
 
-  // We could implement more granular route protection here, 
-  // but we will do it on a per-page/layout basis using the DB permissions for better flexibility.
-  
   return supabaseResponse;
 }
 

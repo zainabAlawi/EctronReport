@@ -30,12 +30,18 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
 
   const years = ['2023', '2024', '2025', '2026', '2027'];
 
+  const createUrl = (mode: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('mode', mode);
+    return `/${division}/dashboard?${params.toString()}`;
+  };
+
   return (
     <div className="flex flex-col sm:flex-row items-center gap-3">
       {/* Mode Toggle */}
       <div className="flex p-1 bg-zinc-900/80 rounded-xl border border-zinc-800">
         <Link
-          href={`/${division}/dashboard?mode=daily&date=${currentDate}&year=${currentYear}`}
+          href={createUrl('daily')}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
             currentMode === 'daily' ? "bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
@@ -45,7 +51,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
           يومي (Daily)
         </Link>
         <Link
-          href={`/${division}/dashboard?mode=yearly&date=${currentDate}&year=${currentYear}`}
+          href={createUrl('yearly')}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
             currentMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
@@ -58,16 +64,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
 
       {/* Date/Year Picker */}
       <div className="flex items-center gap-2">
-        {currentMode === 'daily' ? (
-          <div className="relative">
-            <input 
-              type="date" 
-              value={currentDate}
-              onChange={(e) => handleDateChange(e.target.value)}
-              className="bg-zinc-900/50 border border-zinc-800 text-zinc-300 text-sm rounded-xl px-4 py-2 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100"
-            />
-          </div>
-        ) : (
+        {currentMode === 'yearly' && (
           <div className="relative">
              <select 
                value={currentYear}

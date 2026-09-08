@@ -4,14 +4,13 @@ import { createClient } from '@/lib/supabase-server';
 import MetricsCards from '@/components/dashboard/MetricsCards';
 import ProductionTable from '@/components/dashboard/ProductionTable';
 import { ShiftProductionChart, TargetVsActualChart, AchievementGauge, MonthlyAggregationChart, YearlyGrowthChart } from '@/components/dashboard/Charts';
-import Link from 'next/link';
-import { CalendarIcon } from 'lucide-react';
 import DashboardControls from '@/components/dashboard/DashboardControls';
 import YearlyTable from '../yearly-production/YearlyTable';
+import TableDateRangePicker from '@/components/dashboard/TableDateRangePicker';
 
 export default async function DashboardPage(props: {
   params: Promise<{ division: string }>;
-  searchParams: Promise<{ date?: string; mode?: string; year?: string }>;
+  searchParams: Promise<{ startDate?: string; endDate?: string; mode?: string; year?: string }>;
 }) {
   const searchParams = await props.searchParams;
   const params = await props.params;
@@ -19,20 +18,15 @@ export default async function DashboardPage(props: {
   const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
   const supabase = await createClient();
   
-  let selectedDate = searchParams.date;
-  if (!selectedDate) {
-    const { data: latestDateData } = await supabase
-      .from('production_history')
-      .select('date')
-      .eq('division', division)
-      .order('date', { ascending: false })
-      .limit(1);
-      
-    if (latestDateData && latestDateData.length > 0) {
-      selectedDate = latestDateData[0].date;
-    } else {
-      selectedDate = new Date().toISOString().split('T')[0];
-    }
+  let startDate = searchParams.startDate;
+  let endDate = searchParams.endDate;
+
+  if (!startDate || !endDate) {
+    const today = new Date();
+    const offset = today.getTimezoneOffset();
+    const adjustedDate = new Date(today.getTime() - (offset * 60 * 1000));
+    startDate = adjustedDate.toISOString().split('T')[0];
+    endDate = startDate;
   }
 
   let dataForDate: any = null;
@@ -46,14 +40,22 @@ export default async function DashboardPage(props: {
     const { data, error } = await supabase
       .from(targetTable)
       .select('*')
-      .eq('date', selectedDate);
+      .gte('date', startDate)
+      .lte('date', endDate);
 
     if (error) throw error;
     
     if (data && data.length > 0) {
       dataForDate = {};
       data.forEach(shiftData => {
-        dataForDate[shiftData.shift] = shiftData;
+        const s = shiftData.shift || 'official';
+        if (!dataForDate[s]) dataForDate[s] = {};
+        
+        const fields = ['assembly', 'perso', 'lasering', 'packaging', 'cartons', 'palets', 'cards', 'insolation', 'radiation_frequency', 'calibration', 'multy_test', 'metrology'];
+        fields.forEach(f => {
+           dataForDate[s][f] = (dataForDate[s][f] || 0) + (shiftData[f] || 0);
+        });
+
         if (division === 'water') {
             achieved += shiftData.packaging || 0;
         } else {
@@ -66,7 +68,7 @@ export default async function DashboardPage(props: {
       .from('production_history')
       .select('filename, created_at, summary')
       .eq('division', division)
-      .eq('date', selectedDate)
+      .eq('date', endDate)
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -81,7 +83,12 @@ export default async function DashboardPage(props: {
     console.error('Error fetching dashboard data from Supabase:', e?.message || e);
   }
 
-  const target = customTarget || 640; // Use uploaded target, fallback to 640
+  const d1 = new Date(startDate);
+  const d2 = new Date(endDate);
+  const diffTime = Math.abs(d2.getTime() - d1.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
+  
+  const target = (customTarget || 640) * diffDays; // Use uploaded target * days
   const remaining = Math.max(0, target - achieved);
   const efficiency = target > 0 ? Number(((achieved / target) * 100).toFixed(1)) : 0;
 
@@ -168,7 +175,7 @@ export default async function DashboardPage(props: {
   const isWarning = metrics.efficiency < 90;
   const isExcellent = metrics.achieved >= metrics.target;
 
-  const displayDate = new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(selectedDate as string));
+  const displayDate = startDate === endDate ? new Intl.DateTimeFormat('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(startDate)) : `${startDate} to ${endDate}`;
   
   const mode = searchParams.mode || 'daily';
   const year = searchParams.year || new Date().getFullYear().toString();
@@ -243,7 +250,7 @@ export default async function DashboardPage(props: {
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
-          <DashboardControls currentMode={mode} currentDate={selectedDate as string} currentYear={year} division={division} />
+          <DashboardControls currentMode={mode} currentDate={startDate} currentYear={year} division={division} />
           
           {mode === 'daily' && isWarning && (
             <div className="px-4 py-2 rounded-lg bg-danger/10 border border-danger/20 text-danger text-sm font-medium flex items-center gap-2">
@@ -266,11 +273,15 @@ export default async function DashboardPage(props: {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 flex flex-col gap-6">
               <div className="glass rounded-2xl p-6 border border-border">
-                <h3 className="text-lg font-semibold text-white mb-6">Production Overview</h3>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
+                  <h3 className="text-lg font-semibold text-white">Production Overview</h3>
+                  <TableDateRangePicker />
+                </div>
                 <ProductionTable 
                   type={division as 'water' | 'electricity'} 
                   dynamicWaterData={dataForDate} 
-                  date={selectedDate} 
+                  dateRangeDisplay={startDate !== endDate ? `${startDate} to ${endDate}` : undefined}
+                  date={startDate === endDate ? startDate : undefined}
                   latestFileName={latestFileName}
                   latestFileTime={latestFileTime}
                   target={target}

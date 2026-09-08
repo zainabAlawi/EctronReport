@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Loader2 } from 'lucide-react';
 
 interface UserFormModalProps {
@@ -22,20 +23,60 @@ const ALL_PERMISSIONS = [
 ];
 
 export default function UserFormModal({ user, roles, onClose, onSuccess }: UserFormModalProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [formData, setFormData] = useState({
     username: user?.username || '',
     password: '',
     full_name: user?.full_name || '',
     role_id: user?.roles?.id || roles[0]?.id || '',
+    is_active: user?.is_active ?? true,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // Custom permissions are not fully loaded in this basic edit, 
-  // but we can add the checkboxes for demonstration of the requirement.
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
+  
+  // Track if user has manually changed permissions so we don't overwrite them
+  const [manuallyChanged, setManuallyChanged] = useState(false);
+
+  const [initialLoaded, setInitialLoaded] = useState(false);
+
+  // Auto-select permissions based on chosen role (if not manually edited)
+  useEffect(() => {
+    if (manuallyChanged) return;
+    
+    // Load existing user permissions only once when editing
+    if (user && user.user_permissions && !initialLoaded) {
+      const userPerms = user.user_permissions.map((up: any) => up.permissions?.page_key).filter(Boolean);
+      setSelectedPermissions(userPerms);
+      setInitialLoaded(true);
+      return;
+    }
+    
+    // Auto-update permissions if role changes (only for new users or if role is changed from original)
+    if (!user || (user && formData.role_id !== user.roles?.id)) {
+      const selectedRole = roles.find(r => r.id === formData.role_id);
+      if (!selectedRole) return;
+      
+      const roleName = selectedRole.name.toLowerCase();
+      
+      if (roleName.includes('admin')) {
+        setSelectedPermissions(ALL_PERMISSIONS.map(p => p.key));
+      } else if (roleName.includes('manager')) {
+        setSelectedPermissions(['electricity_dashboard', 'electricity_reports', 'water_dashboard', 'water_reports']);
+      } else {
+        setSelectedPermissions(['electricity_daily_entry', 'water_daily_entry']);
+      }
+    }
+  }, [formData.role_id, roles, manuallyChanged, user, initialLoaded]);
 
   const togglePermission = (key: string) => {
+    setManuallyChanged(true);
     setSelectedPermissions(prev => 
       prev.includes(key) ? prev.filter(p => p !== key) : [...prev, key]
     );
@@ -54,7 +95,7 @@ export default function UserFormModal({ user, roles, onClose, onSuccess }: UserF
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save user');
+      if (!res.ok) throw new Error(data.error || 'Failed to save user (Check SUPABASE_SERVICE_ROLE_KEY)');
       
       onSuccess(data.user);
     } catch (err: any) {
@@ -63,8 +104,10 @@ export default function UserFormModal({ user, roles, onClose, onSuccess }: UserF
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
       <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh]">
         <div className="flex justify-between items-center p-6 border-b border-zinc-800">
           <h2 className="text-xl font-bold text-white">{user ? 'Edit User' : 'Add New User'}</h2>
@@ -129,6 +172,18 @@ export default function UserFormModal({ user, roles, onClose, onSuccess }: UserF
                   ))}
                 </select>
               </div>
+              
+              <div className="flex items-center mt-8">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.is_active}
+                    onChange={e => setFormData({ ...formData, is_active: e.target.checked })}
+                    className="w-5 h-5 rounded border-zinc-700 bg-zinc-800 text-blue-500 focus:ring-blue-500/50"
+                  />
+                  <span className="text-sm font-medium text-zinc-300">Active User (مستخدم نشط)</span>
+                </label>
+              </div>
             </div>
 
             <div className="pt-4 border-t border-zinc-800">
@@ -171,6 +226,7 @@ export default function UserFormModal({ user, roles, onClose, onSuccess }: UserF
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

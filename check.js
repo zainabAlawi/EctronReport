@@ -11,23 +11,15 @@ const env = envFile.split('\n').reduce((acc, line) => {
 }, {});
 
 const supabaseUrl = env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseKey = env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function check() {
-  const { data: users, error } = await supabase.from('profiles').select('*');
-  if (error) {
-    console.error('Error fetching profiles:', error);
-  } else {
-    console.log('Profiles:', users);
-  }
+  const { data: roles } = await supabase.from('roles').select('*');
+  console.log('Roles:', roles);
   
-  const { data: roles, error: rolesError } = await supabase.from('roles').select('*');
-  if (rolesError) {
-    console.error('Error fetching roles:', rolesError);
-  } else {
-    console.log('Roles:', roles);
-  }
+  const { data: profiles } = await supabase.from('profiles').select('*');
+  console.log('Profiles:', profiles);
 }
 
 check();
