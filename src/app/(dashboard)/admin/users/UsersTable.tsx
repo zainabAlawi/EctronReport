@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { UserPlus, Trash2, Edit2, ShieldAlert, Upload, CheckCircle2, AlertTriangle, XCircle, Loader2, ArrowUpDown, ChevronUp, ChevronDown } from 'lucide-react';
+import { UserPlus, Trash2, Edit2, ShieldAlert, Upload, CheckCircle2, AlertTriangle, XCircle, Loader2, ArrowUpDown, ChevronUp, ChevronDown, Download } from 'lucide-react';
 import clsx from 'clsx';
 import UserFormModal from './UserFormModal';
 import RolesManagementModal from './RolesManagementModal';
@@ -191,6 +191,22 @@ export default function UsersTable({ initialUsers, roles: initialRoles }: { init
     setIsImportModalOpen(false);
   };
 
+  const exportToExcel = () => {
+    const exportData = users.map(u => ({
+      'Name': u.full_name,
+      'Username': u.username,
+      'Role': u.roles?.name || 'Unknown',
+      'Permissions': u.computed_permissions?.join(', ') || '-',
+      'Status': u.is_active ? 'Active' : 'Inactive'
+    }));
+
+    const worksheet = xlsx.utils.json_to_sheet(exportData);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, worksheet, "Users");
+    
+    xlsx.writeFile(workbook, "Users_List.xlsx");
+  };
+
   return (
     <>
       <div className="glass rounded-2xl border border-border overflow-hidden">
@@ -207,6 +223,13 @@ export default function UsersTable({ initialUsers, roles: initialRoles }: { init
             )}
           </div>
           <div className="flex items-center gap-3">
+            <button 
+              onClick={exportToExcel}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-sm font-medium transition-colors cursor-pointer border border-blue-500/20"
+            >
+              <Download className="w-4 h-4" />
+              Export Excel
+            </button>
             <button 
               onClick={() => setIsSelectFileModalOpen(true)}
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-sm font-medium transition-colors cursor-pointer border border-emerald-500/20"
@@ -282,6 +305,8 @@ export default function UsersTable({ initialUsers, roles: initialRoles }: { init
                       "px-2.5 py-1 rounded-full text-xs font-medium border whitespace-nowrap",
                       user.roles?.name === 'Admin' ? "bg-purple-500/10 border-purple-500/20 text-purple-400" :
                       user.roles?.name === 'Manager' ? "bg-blue-500/10 border-blue-500/20 text-blue-400" :
+                      user.roles?.name === 'Supervisor' || user.roles?.name === 'سوبر فايزر' ? "bg-amber-500/10 border-amber-500/20 text-amber-400" :
+                      user.roles?.name === 'Employee' || user.roles?.name === 'موظف' || user.roles?.name === 'الموظف' ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" :
                       "bg-zinc-800 border-zinc-700 text-zinc-400"
                     )}>
                       {user.roles?.name || 'Unknown'}

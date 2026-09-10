@@ -14,7 +14,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq('id', user.id)
     .single();
     
-  if (!profileData || profileData.roles?.name !== 'Admin') {
+  if (!profileData) {
+    redirect('/electricity/dashboard');
+  }
+
+  const role: any = Array.isArray(profileData.roles) ? profileData.roles[0] : profileData.roles;
+  if (role?.name !== 'Admin') {
     redirect('/electricity/dashboard'); // Restrict access
   }
 

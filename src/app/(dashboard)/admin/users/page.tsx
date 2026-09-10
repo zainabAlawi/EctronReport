@@ -25,16 +25,19 @@ export default async function AdminUsersPage() {
   const { data: rolePermissions } = await supabase.from('role_permissions').select('*');
 
   // Map permissions to users
-  const usersWithPerms = users?.map(user => {
+  const usersWithPerms: any[] = (users || []).map((user: any) => {
     let permNames = new Set<string>();
     
+    // Extract role safely whether it's an object or an array (Supabase typings can be weird)
+    const role = Array.isArray(user.roles) ? user.roles[0] : user.roles;
+
     // Admin has everything
-    if (user.roles?.name === 'Admin') {
+    if (role?.name === 'Admin') {
       permNames.add('Full Access (Admin)');
     } else {
       // Add role permissions
-      if (user.roles?.id && rolePermissions && allPermissions) {
-        const rolePermIds = rolePermissions.filter(rp => rp.role_id === user.roles.id).map(rp => rp.permission_id);
+      if (role?.id && rolePermissions && allPermissions) {
+        const rolePermIds = rolePermissions.filter(rp => rp.role_id === role.id).map(rp => rp.permission_id);
         const rolePerms = allPermissions.filter(p => rolePermIds.includes(p.id)).map(p => p.page_name);
         rolePerms.forEach(p => permNames.add(p));
       }
@@ -52,9 +55,10 @@ export default async function AdminUsersPage() {
     
     return {
       ...user,
+      roles: role,
       computed_permissions: Array.from(permNames)
     };
-  }) || [];
+  });
 
   return (
     <div className="flex flex-col gap-6">

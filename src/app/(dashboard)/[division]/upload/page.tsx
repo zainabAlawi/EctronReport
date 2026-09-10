@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { UploadCloud, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Calendar, Download, X, Trash2 } from 'lucide-react';
+import { UploadCloud, FileSpreadsheet, CheckCircle, AlertCircle, Clock, Calendar, Download, X, Trash2, User } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import clsx from 'clsx';
 import * as XLSX from 'xlsx';
+import { createClient } from '@/lib/supabase';
 
 export default function UploadPage() {
   const params = useParams();
@@ -40,7 +41,23 @@ export default function UploadPage() {
 
   useEffect(() => {
     fetchHistory();
+    fetchCurrentUser();
   }, [division]);
+
+  const fetchCurrentUser = async () => {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: profile } = await supabase.from('profiles').select('full_name, username').eq('id', user.id).single();
+      if (profile && profile.full_name) {
+        setUploaderName(profile.full_name);
+      } else if (profile && profile.username) {
+        setUploaderName(profile.username);
+      } else {
+        setUploaderName(user.email || 'Unknown');
+      }
+    }
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -308,14 +325,11 @@ export default function UploadPage() {
         {/* Uploader Name & Target */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-4 block">Uploader Name (اسم الشخص)</label>
-            <input 
-              type="text" 
-              placeholder="Enter your name..."
-              value={uploaderName}
-              onChange={(e) => setUploaderName(e.target.value)}
-              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
-            />
+            <label className="text-sm font-medium text-zinc-300 mb-4 block">Uploader Name (اسم رافع التقرير)</label>
+            <div className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-400 rounded-xl p-4 cursor-not-allowed flex items-center gap-3">
+               <User className="w-5 h-5 text-blue-400" />
+               {uploaderName ? <span className="text-zinc-200 font-medium">{uploaderName}</span> : <span className="opacity-50">جاري جلب الاسم...</span>}
+            </div>
           </div>
           <div>
             <label className="text-sm font-medium text-zinc-300 mb-4 block">Daily Target (الهدف اليومي)</label>
