@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No valid daily data found in file' }, { status: 400 });
     }
 
-    const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+    const targetTable = division === 'water' ? 'water_daily_production' : division === 'electricity-ecs1100' ? 'electricity_ecs1100_daily_production' : 'electricity_daily_production';
     
     // Calculate overall summary and filter out 0-value days
     const summary: any = {};
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
     // Insert a single history record for this upload
     const uploadDate = new Date().toISOString().split('T')[0];
-    const generatedFilename = `${uploadDate} - تقرير ${division === 'water' ? 'المياه' : 'الكهرباء'} السنوي`;
+    const generatedFilename = `${uploadDate} - تقرير ${division === 'water' ? 'المياه' : division === 'electricity-ecs1100' ? 'الكهرباء ECS1100' : 'الكهرباء M212'} السنوي`;
 
     const { error: historyError } = await (await createClient())
       .from('production_history')

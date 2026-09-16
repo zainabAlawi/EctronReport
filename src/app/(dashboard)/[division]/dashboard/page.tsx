@@ -15,7 +15,7 @@ export default async function DashboardPage(props: {
   const searchParams = await props.searchParams;
   const params = await props.params;
   const division = params.division;
-  const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+  const targetTable = division === 'water' ? 'water_daily_production' : division === 'electricity-ecs1100' ? 'electricity_ecs1100_daily_production' : 'electricity_daily_production';
   const supabase = await createClient();
   
   let startDate = searchParams.startDate;
@@ -55,6 +55,13 @@ export default async function DashboardPage(props: {
         fields.forEach(f => {
            dataForDate[s][f] = (dataForDate[s][f] || 0) + (shiftData[f] || 0);
         });
+        
+        if (shiftData.failers) {
+          if (!dataForDate[s].failers) dataForDate[s].failers = {};
+          Object.keys(shiftData.failers).forEach(fKey => {
+            dataForDate[s].failers[fKey] = (dataForDate[s].failers[fKey] || 0) + (shiftData.failers[fKey] || 0);
+          });
+        }
 
         if (division === 'water') {
             achieved += shiftData.packaging || 0;
@@ -147,7 +154,7 @@ export default async function DashboardPage(props: {
   let last10ChartDates: string[] = [];
   
   try {
-    const table = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+    const table = division === 'water' ? 'water_daily_production' : division === 'electricity-ecs1100' ? 'electricity_ecs1100_daily_production' : 'electricity_daily_production';
     const field = division === 'water' ? 'packaging' : 'multy_test';
     
     const { data: recentData } = await supabase
@@ -243,8 +250,8 @@ export default async function DashboardPage(props: {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">
-            {mode === 'daily' ? `Today's Production - ${displayDate}` : `Yearly Overview - ${year}`}
+          <h1 className="text-2xl font-bold text-white print:text-black">
+            {division === 'water' ? 'Water Siconia' : division === 'electricity-ecs1100' ? 'Electricity ECS1100' : 'Electricity M212'} - {mode === 'daily' ? `Today's Production (${displayDate})` : `Yearly Overview (${year})`}
           </h1>
           <p className="text-zinc-400 text-sm mt-1">Real-time overview of smart meters assembly</p>
         </div>
@@ -259,8 +266,8 @@ export default async function DashboardPage(props: {
             </div>
           )}
           {mode === 'daily' && isExcellent && (
-            <div className="px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <div className="px-4 py-2 rounded-lg bg-[#00a99d]/10 border border-[#00a99d]/20 text-[#00a99d] text-sm font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#00a99d] animate-pulse"></span>
               Excellent: Target Reached!
             </div>
           )}
@@ -274,12 +281,22 @@ export default async function DashboardPage(props: {
             <div className="lg:col-span-2 flex flex-col gap-6">
               <div className="glass rounded-2xl p-6 border border-border">
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-                  <h3 className="text-lg font-semibold text-white">Production Overview</h3>
+                  <h3 className="text-lg font-semibold text-white print:text-black">Production Overview</h3>
                   <TableDateRangePicker />
                 </div>
                 <ProductionTable 
                   type={division as 'water' | 'electricity'} 
                   dynamicWaterData={dataForDate} 
+                  failersData={
+                    dataForDate 
+                      ? Object.values(dataForDate).reduce((acc: any, shift: any) => {
+                          if (shift.failers) {
+                            Object.keys(shift.failers).forEach(k => acc[k] = (acc[k] || 0) + shift.failers[k]);
+                          }
+                          return acc;
+                        }, {})
+                      : {}
+                  }
                   dateRangeDisplay={startDate !== endDate ? `${startDate} to ${endDate}` : undefined}
                   date={startDate === endDate ? startDate : undefined}
                   latestFileName={latestFileName}
@@ -289,7 +306,7 @@ export default async function DashboardPage(props: {
               </div>
               
               <div className="glass rounded-2xl p-6 border border-border">
-                <h3 className="text-lg font-semibold text-white mb-6">
+                <h3 className="text-lg font-semibold text-white print:text-black mb-6">
                   Production (Last 10 Days)
                 </h3>
                 <ShiftProductionChart 
@@ -301,12 +318,12 @@ export default async function DashboardPage(props: {
             
             <div className="flex flex-col gap-6">
               <div className="glass rounded-2xl p-6 border border-border">
-                <h3 className="text-lg font-semibold text-white mb-6">Achievement</h3>
+                <h3 className="text-lg font-semibold text-white print:text-black mb-6">Achievement</h3>
                 <AchievementGauge achieved={metrics.achieved} target={metrics.target} />
               </div>
 
               <div className="glass rounded-2xl p-6 border border-border">
-                <h3 className="text-lg font-semibold text-white mb-6">Target vs Actual</h3>
+                <h3 className="text-lg font-semibold text-white print:text-black mb-6">Target vs Actual</h3>
                 <TargetVsActualChart categories={chartCategories} targetData={chartTargetData} actualData={chartActualData} />
               </div>
             </div>
@@ -316,22 +333,22 @@ export default async function DashboardPage(props: {
         <div className="grid grid-cols-1 gap-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="glass rounded-2xl p-6 border border-border lg:col-span-2">
-              <h3 className="text-lg font-semibold text-white mb-6">Yearly Aggregation by Month - {year}</h3>
+              <h3 className="text-lg font-semibold text-white print:text-black mb-6">Yearly Aggregation by Month - {year}</h3>
               <MonthlyAggregationChart dbData={yearlyData} division={division} year={year} />
             </div>
             <div className="glass rounded-2xl p-6 border border-border">
-              <h3 className="text-lg font-semibold text-white mb-6">Yearly Achievement</h3>
+              <h3 className="text-lg font-semibold text-white print:text-black mb-6">Yearly Achievement</h3>
               <AchievementGauge achieved={yearlyAchieved} target={yearlyTarget} />
             </div>
           </div>
           
           <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Overall Yearly Growth</h3>
+            <h3 className="text-lg font-semibold text-white print:text-black mb-6">Overall Yearly Growth</h3>
             <YearlyGrowthChart dbData={allData} division={division} />
           </div>
 
           <div className="glass rounded-2xl p-6 border border-border">
-            <h3 className="text-lg font-semibold text-white mb-6">Production History - {year}</h3>
+            <h3 className="text-lg font-semibold text-white print:text-black mb-6">Production History - {year}</h3>
             <YearlyTable data={flatData} division={division} />
           </div>
         </div>

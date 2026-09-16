@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS public.water_daily_production (
   packaging integer DEFAULT 0,
   cartons integer DEFAULT 0,
   palets integer DEFAULT 0,
+  failers jsonb DEFAULT '{}'::jsonb,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(date, shift)
 );
@@ -29,6 +30,7 @@ CREATE TABLE IF NOT EXISTS public.electricity_daily_production (
   multy_test integer DEFAULT 0,
   metrology integer DEFAULT 0,
   perso integer DEFAULT 0,
+  failers jsonb DEFAULT '{}'::jsonb,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(date, shift)
 );

@@ -19,7 +19,8 @@ export default function ProductionTable({
   latestFileName,
   latestFileTime,
   target = 640,
-  dateRangeDisplay
+  dateRangeDisplay,
+  failersData
 }: { 
   type?: 'water' | 'electricity',
   dynamicWaterData?: any,
@@ -27,7 +28,8 @@ export default function ProductionTable({
   latestFileName?: string | null,
   latestFileTime?: string | null,
   target?: number,
-  dateRangeDisplay?: string
+  dateRangeDisplay?: string,
+  failersData?: any
 }) {
   const shifts = dynamicWaterData || {
     shift1: {},
@@ -36,14 +38,17 @@ export default function ProductionTable({
     official: {},
   };
 
+  const failers = failersData || {};
+
   const buildRow = (department: string, target: number, key: string) => {
     const s1 = shifts.shift1?.[key] || 0;
     const s2 = shifts.shift2?.[key] || 0;
     const s3 = shifts.shift3?.[key] || 0;
     const official = shifts.official?.[key] || 0;
+    const failer = failers[key] || 0;
     const total = s1 + s2 + s3 + official;
     const percentage = target > 0 ? Number(((total / target) * 100).toFixed(1)) : 0;
-    return { department, target, shift1: s1 || '', shift2: s2 || '', shift3: s3 || '', total, percentage };
+    return { department, target, shift1: s1 || '', shift2: s2 || '', shift3: s3 || '', failer: failer || '', total, percentage };
   };
 
   const dateObj = date ? new Date(date) : new Date();
@@ -57,10 +62,10 @@ export default function ProductionTable({
         <div className="flex items-center gap-2 text-blue-400">
           <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
           <span className="font-medium">أحدث ملف مرفوع:</span>
-          <span className="text-white">{latestFileName}</span>
+          <span className="text-white print:text-black">{latestFileName}</span>
         </div>
-        <div className="text-zinc-400">
-          وقت الرفع: <span className="text-zinc-300">{latestFileTime}</span>
+        <div className="text-zinc-100 print:text-[#1b497f] font-semibold">
+          وقت الرفع: <span className="text-white print:text-black font-medium">{latestFileTime}</span>
         </div>
       </div>
     );
@@ -84,11 +89,11 @@ export default function ProductionTable({
           <thead>
             <tr className="border-b border-teal-800/50 bg-teal-900/30">
               <th className="py-3 px-4 text-sm font-semibold text-teal-100 border-r border-teal-800/50 w-1/4">Day</th>
-              <th colSpan={6} className="py-3 px-4 text-sm font-semibold text-teal-100 text-center">{dayString}</th>
+              <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-teal-100 text-center">{dayString}</th>
             </tr>
             <tr className="border-b border-teal-800/50 bg-teal-900/30">
               <th className="py-3 px-4 text-sm font-semibold text-teal-100 border-r border-teal-800/50">Date</th>
-              <th colSpan={6} className="py-3 px-4 text-sm font-semibold text-teal-100 text-center">{dateString}</th>
+              <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-teal-100 text-center">{dateString}</th>
             </tr>
             <tr className="border-b border-teal-800/50 bg-teal-950/40">
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50">Step</th>
@@ -97,6 +102,7 @@ export default function ProductionTable({
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 1</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 2</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Shift 3</th>
+              <th className="py-3 px-4 text-sm font-semibold text-red-400 border-r border-teal-800/50 text-center">Failer</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 text-center">%</th>
             </tr>
           </thead>
@@ -107,11 +113,12 @@ export default function ProductionTable({
                   <span className="text-[10px]">{getStatusDot(row.percentage)}</span>
                   {row.department}
                 </td>
-                <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.target}</td>
+                <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-teal-800/50 bg-zinc-800/20">{row.target}</td>
                 <td className="py-3 px-4 text-sm font-bold text-teal-100 text-center border-r border-teal-800/50 bg-teal-900/30">{row.total}</td>
-                <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift1}</td>
-                <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift2}</td>
-                <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift3}</td>
+                <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift1}</td>
+                <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift2}</td>
+                <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-teal-800/50 bg-zinc-800/20">{row.shift3}</td>
+                <td className="py-3 px-4 text-sm text-red-400 font-bold text-center border-r border-teal-800/50 bg-zinc-800/20">{row.failer}</td>
                 <td className="py-3 px-4 text-center">
                   <span className={clsx(
                     "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
@@ -148,35 +155,37 @@ export default function ProductionTable({
         <table className="w-full text-left border-collapse">
         <thead>
           <tr className="border-b border-zinc-800/50 bg-zinc-900/50">
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-300 border-r border-zinc-800/50 w-1/4">Day</th>
-            <th colSpan={6} className="py-3 px-4 text-sm font-semibold text-zinc-300 text-center">{dayString}</th>
+            <th className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium border-r border-zinc-800/50 w-1/4">Day</th>
+            <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium text-center">{dayString}</th>
           </tr>
           <tr className="border-b border-zinc-800/50 bg-zinc-900/50">
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-300 border-r border-zinc-800/50">Date</th>
-            <th colSpan={6} className="py-3 px-4 text-sm font-semibold text-zinc-300 text-center">{dateString}</th>
+            <th className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium border-r border-zinc-800/50">Date</th>
+            <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium text-center">{dateString}</th>
           </tr>
           <tr className="border-b border-zinc-800 bg-zinc-900/80">
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800">Step</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Target</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Total</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 1</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 2</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 border-r border-zinc-800 text-center">Shift 3</th>
-            <th className="py-3 px-4 text-sm font-semibold text-zinc-400 text-center">%</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800">Step</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Target</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Total</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Shift 1</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Shift 2</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Shift 3</th>
+            <th className="py-3 px-4 text-sm font-semibold text-red-400 border-r border-zinc-800 text-center">Failer</th>
+            <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold text-center">%</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-800/50">
           {electricityProductionData.map((row) => (
             <tr key={row.department} className="hover:bg-zinc-800/30 transition-colors">
-              <td className="py-3 px-4 text-sm font-medium text-zinc-100 border-r border-zinc-800 bg-zinc-900/20 flex items-center gap-2">
+              <td className="py-3 px-4 text-sm font-medium text-zinc-100 print:text-[#1b497f] border-r border-zinc-800 bg-zinc-900/20 flex items-center gap-2">
                 <span className="text-[10px]">{getStatusDot(row.percentage)}</span>
                 {row.department}
               </td>
-              <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.target}</td>
-              <td className="py-3 px-4 text-sm font-bold text-white text-center border-r border-zinc-800 bg-zinc-800/30">{row.total}</td>
-              <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift1}</td>
-              <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift2}</td>
-              <td className="py-3 px-4 text-sm text-zinc-300 text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift3}</td>
+              <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-zinc-800 bg-zinc-900/40">{row.target}</td>
+              <td className="py-3 px-4 text-sm font-bold text-white print:text-black text-center border-r border-zinc-800 bg-zinc-800/30">{row.total}</td>
+              <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift1}</td>
+              <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift2}</td>
+              <td className="py-3 px-4 text-sm text-white print:text-black font-medium text-center border-r border-zinc-800 bg-zinc-900/40">{row.shift3}</td>
+              <td className="py-3 px-4 text-sm text-red-400 font-bold text-center border-r border-zinc-800 bg-zinc-900/40">{row.failer}</td>
               <td className="py-3 px-4 text-center">
                 <span className={clsx(
                   "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",

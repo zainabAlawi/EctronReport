@@ -56,7 +56,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <div className="min-h-screen bg-background">
       <Sidebar userPermissions={permissions} roleName={roleName} />
-      <div className="pl-64 flex flex-col min-h-screen">
+      <div className="pl-64 print:pl-0 flex flex-col min-h-screen">
         <TopNav profile={profile} roleName={roleName} />
         <main className="flex-1 p-6 relative">
           {/* Subtle background glow */}

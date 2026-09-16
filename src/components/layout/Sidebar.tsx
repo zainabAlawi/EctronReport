@@ -26,14 +26,14 @@ export default function Sidebar({ userPermissions = [], roleName = '' }: Sidebar
   
   // Extract division from pathname (e.g. /water/dashboard -> water)
   const parts = pathname.split('/');
-  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity') ? parts[1] : 'electricity'; // Default to electricity
+  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity' || parts[1] === 'electricity-ecs1100') ? parts[1] : 'electricity'; 
 
   const hasPermission = (key: string) => {
     if (roleName === 'Admin') return true;
     return userPermissions.includes(key);
   };
 
-  const isHome = pathname === '/home';
+  const isHome = pathname === '/home' || pathname === '/coming-soon';
   
   const navItems = [
     { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
@@ -61,12 +61,14 @@ export default function Sidebar({ userPermissions = [], roleName = '' }: Sidebar
   };
 
   return (
-    <aside className="w-64 h-screen bg-card border-r border-border flex flex-col glass fixed left-0 top-0 z-40">
+    <aside className="w-64 h-screen bg-card border-r border-border flex flex-col glass fixed left-0 top-0 z-40 print:hidden">
       <div className="h-16 flex items-center px-6 border-b border-border">
         <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent flex gap-2">
           ECTRON Smart 
           {!isHome && !pathname.startsWith('/admin') && (
-            <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">{division}</span>
+            <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">
+              {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : 'M212'}
+            </span>
           )}
         </h1>
       </div>

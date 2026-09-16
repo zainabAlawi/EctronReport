@@ -54,7 +54,7 @@ export default function YearlyTable({ data, division }: { data: DailyData[], div
           placeholder="Filter by date (YYYY-MM-DD)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-3 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
+          className="bg-zinc-900/50 border border-zinc-800 text-white print:text-black font-medium rounded-xl p-3 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50"
         />
 
         <div className="flex gap-3">
@@ -78,7 +78,7 @@ export default function YearlyTable({ data, division }: { data: DailyData[], div
       <div className="glass rounded-2xl border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-400 border-b border-border">
+            <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-100 print:text-[#1b497f] font-semibold border-b border-border">
               {division === 'water' ? (
                 <tr>
                   <th className="px-6 py-4 font-medium whitespace-nowrap">Date</th>
@@ -111,26 +111,26 @@ export default function YearlyTable({ data, division }: { data: DailyData[], div
               ) : (
                 filteredData.map((row) => (
                   <tr key={row.date} className="bg-transparent hover:bg-white/5 transition-colors">
-                    <td className="px-6 py-4 font-medium text-white">{row.date}</td>
+                    <td className="px-6 py-4 font-medium text-white print:text-black">{row.date}</td>
                     {division === 'water' ? (
                       <>
-                        <td className="px-6 py-4 text-zinc-300">{row.assembly}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.perso}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.lasering}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.packaging}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.cartons}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.palets}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.assembly}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.perso}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.lasering}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.packaging}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.cartons}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.palets}</td>
                       </>
                     ) : (
                       <>
-                        <td className="px-6 py-4 text-zinc-300">{row.cards}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.assembly}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.insolation}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.radiation_frequency}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.calibration}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.multy_test}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.metrology}</td>
-                        <td className="px-6 py-4 text-zinc-300">{row.perso}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.cards}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.assembly}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.insolation}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.radiation_frequency}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.calibration}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.multy_test}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.metrology}</td>
+                        <td className="px-6 py-4 text-white print:text-black font-medium">{row.perso}</td>
                       </>
                     )}
                   </tr>

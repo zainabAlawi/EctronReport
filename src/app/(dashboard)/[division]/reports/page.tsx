@@ -100,6 +100,7 @@ export default function ReportsPage() {
   };
 
   const todayTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
+  const failersTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
   
   dailyData.forEach(d => {
     // Totals for summary and steps efficiency
@@ -115,6 +116,27 @@ export default function ReportsPage() {
     todayTotals.calibration += (d.calibration || 0);
     todayTotals.multy_test += (d.multy_test || 0);
     todayTotals.metrology += (d.metrology || 0);
+
+    // Failers totals
+    if (d.failers) {
+      // Sometimes it's a string from db
+      let f = d.failers;
+      if (typeof f === 'string') {
+        try { f = JSON.parse(f); } catch (e) {}
+      }
+      failersTotals.assembly += (f.assembly || 0);
+      failersTotals.perso += (f.perso || 0);
+      failersTotals.lasering += (f.lasering || 0);
+      failersTotals.packaging += (f.packaging || 0);
+      failersTotals.cartons += (f.cartons || 0);
+      failersTotals.palets += (f.palets || 0);
+      failersTotals.cards += (f.cards || 0);
+      failersTotals.insolation += (f.insolation || 0);
+      failersTotals.radiation_frequency += (f.radiation_frequency || 0);
+      failersTotals.calibration += (f.calibration || 0);
+      failersTotals.multy_test += (f.multy_test || 0);
+      failersTotals.metrology += (f.metrology || 0);
+    }
 
     // Totals per shift for ProductionTable
     const s = d.shift || 'official';
@@ -242,7 +264,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="glass rounded-2xl p-6 border border-border min-h-[400px]">
-        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={startDate === endDate ? startDate : `${startDate} to ${endDate}`} target={rangeTarget} shiftData={shiftTotals} />}
+        {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={startDate === endDate ? startDate : `${startDate} to ${endDate}`} target={rangeTarget} shiftData={shiftTotals} failersData={failersTotals} />}
         {activeTab === 'Weekly' && <WeeklyReport dbData={dbData} division={division} year={selectedYear} month={selectedMonth} />}
         {activeTab === 'Monthly' && <MonthlyReport dbData={dbData} division={division} year={selectedYear} />}
         {activeTab === 'Yearly' && <YearlyReport dbData={dbData} division={division} />}
@@ -251,12 +273,13 @@ export default function ReportsPage() {
   );
 }
 
-function DailyReport({ division, totals, date, target, shiftData }: { division: string, totals: any, date: string, target: number, shiftData: any }) {
+function DailyReport({ division, totals, date, target, shiftData, failersData }: { division: string, totals: any, date: string, target: number, shiftData: any, failersData?: any }) {
   const isWater = division === 'water';
   
   const achieved = isWater ? totals.packaging : totals.multy_test;
   const remaining = Math.max(0, target - achieved);
   const eff = target > 0 ? ((achieved / target) * 100).toFixed(1) : '0';
+  const totalFailers = failersData ? Object.values(failersData).reduce((acc: number, val: any) => acc + (Number(val) || 0), 0) : 0;
 
   const formatStep = (val: number) => {
     const v = target > 0 ? (val / target) * 100 : 0;
@@ -272,11 +295,15 @@ function DailyReport({ division, totals, date, target, shiftData }: { division: 
 
   return (
     <div className="flex flex-col gap-6">
-      <h3 className="text-lg font-semibold text-white mb-2">Daily Summary</h3>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+
+
+      <h3 className="text-lg font-semibold text-white print:text-black mb-2">Daily Summary</h3>
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatBox label="Today's Target" value={target.toLocaleString()} />
-        <StatBox label="Production" value={achieved.toLocaleString()} color="text-emerald-400" />
-        <StatBox label="Remaining" value={remaining.toLocaleString()} color="text-yellow-400" />
+        <StatBox label="Production" value={achieved.toLocaleString()} color="text-[#00a99d]" />
+        <StatBox label="Remaining" value={remaining.toLocaleString()} color="text-orange-500" />
+        <StatBox label="Total Failers" value={totalFailers.toLocaleString()} color="text-red-500" />
         <StatBox label="Efficiency" value={`${eff}%`} />
       </div>
       
@@ -313,6 +340,7 @@ function DailyReport({ division, totals, date, target, shiftData }: { division: 
           dateRangeDisplay={date.includes('to') ? date : undefined}
           date={!date.includes('to') ? date : undefined}
           target={target}
+          failersData={failersData}
         />
       </div>
     </div>

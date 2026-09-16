@@ -2,7 +2,7 @@
 
 import { Search, Bell, LogOut } from 'lucide-react';
 import { createClient } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface TopNavProps {
   profile?: any;
@@ -13,6 +13,7 @@ export default function TopNav({ profile, roleName }: TopNavProps) {
   const fullName = profile?.full_name || 'User';
   const displayInitial = fullName.charAt(0).toUpperCase();
   const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -21,9 +22,25 @@ export default function TopNav({ profile, roleName }: TopNavProps) {
     router.refresh();
   };
 
+  // Extract section from pathname
+  const parts = pathname.split('/');
+  const section = parts[1] || '';
+  
+  let sectionTitle = '';
+  if (section === 'water') sectionTitle = 'المياه (Water Siconia)';
+  else if (section === 'electricity') sectionTitle = 'الكهرباء (Electricity M212)';
+  else if (section === 'electricity-ecs1100') sectionTitle = 'الكهرباء (Electricity ECS1100)';
+  else if (section === 'admin') sectionTitle = 'لوحة الإدارة (Admin Panel)';
+  else if (section === 'home') sectionTitle = 'الرئيسية (Home)';
+
   return (
-    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-30 glass">
-      <div className="flex items-center flex-1 max-w-2xl gap-4">
+    <header className="h-16 border-b border-border bg-card/80 backdrop-blur-md flex items-center justify-between px-6 sticky top-0 z-30 glass print:hidden">
+      <div className="flex items-center flex-1 max-w-3xl gap-6">
+        {sectionTitle && (
+          <h2 className="text-lg font-semibold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent whitespace-nowrap">
+            {sectionTitle}
+          </h2>
+        )}
         <div className="relative w-full max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
           <input 

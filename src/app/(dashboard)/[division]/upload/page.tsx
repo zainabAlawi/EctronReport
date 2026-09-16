@@ -153,7 +153,7 @@ export default function UploadPage() {
         }
         
         // Override cards to always equal assembly for electricity
-        if (division === 'electricity') {
+        if (division === 'electricity' || division === 'electricity-ecs1100') {
           Object.keys(dailyData).forEach(dateKey => {
             dailyData[dateKey].cards = dailyData[dateKey].assembly;
           });
@@ -220,7 +220,9 @@ export default function UploadPage() {
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-8 py-8 relative">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-2">Upload Production Data</h1>
+        <h1 className="text-2xl font-bold text-white">
+          Data Entry - {division === 'water' ? 'Water Siconia' : division === 'electricity-ecs1100' ? 'Electricity ECS1100' : 'Electricity M212'}
+        </h1>
         <p className="text-zinc-400">Import Excel, CSV, or PDF files to automatically update the dashboard metrics.</p>
       </div>
 

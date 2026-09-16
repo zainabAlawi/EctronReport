@@ -5,7 +5,7 @@ export default function HomePage() {
   const divisions = [
     {
       id: 'electricity',
-      name: 'الكهرباء (Electricity)',
+      name: 'الكهرباء (Electricity M212)',
       icon: Zap,
       color: 'from-amber-400 to-orange-500',
       bgClass: 'bg-orange-500/10',
@@ -13,8 +13,17 @@ export default function HomePage() {
       iconColor: 'text-orange-400',
     },
     {
+      id: 'electricity-ecs1100',
+      name: 'الكهرباء (Electricity ECS1100)',
+      icon: Zap,
+      color: 'from-yellow-400 to-amber-500',
+      bgClass: 'bg-yellow-500/10',
+      borderClass: 'border-yellow-500/20',
+      iconColor: 'text-yellow-400',
+    },
+    {
       id: 'water',
-      name: 'المياه (Water)',
+      name: 'المياه (Water Siconia)',
       icon: Droplet,
       color: 'from-blue-400 to-cyan-500',
       bgClass: 'bg-blue-500/10',
@@ -38,7 +47,7 @@ export default function HomePage() {
           return (
             <Link 
               key={div.id} 
-              href={`/${div.id}/dashboard`}
+              href={div.id === 'electricity-ecs1100' ? '/coming-soon' : `/${div.id}/dashboard`}
               className={`group flex flex-col items-center justify-center p-10 rounded-3xl border ${div.borderClass} ${div.bgClass} hover:bg-zinc-800/80 transition-all duration-300 hover:scale-105 shadow-xl glass`}
             >
               <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mb-6 bg-zinc-900 shadow-inner group-hover:shadow-${div.iconColor.split('-')[1]}-500/20 transition-all`}>

@@ -11,7 +11,7 @@ export default async function YearlyProductionPage(props: { params: Promise<{ di
   let flatData: any[] = [];
 
   try {
-    const targetTable = division === 'water' ? 'water_daily_production' : 'electricity_daily_production';
+    const targetTable = division === 'water' ? 'water_daily_production' : division === 'electricity-ecs1100' ? 'electricity_ecs1100_daily_production' : 'electricity_daily_production';
     const { data, error } = await supabase
       .from(targetTable)
       .select('*');
@@ -66,7 +66,9 @@ export default async function YearlyProductionPage(props: { params: Promise<{ di
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Yearly Production History</h1>
+          <h1 className="text-2xl font-bold text-white">
+            Yearly Production History - {division === 'water' ? 'Water Siconia' : division === 'electricity-ecs1100' ? 'Electricity ECS1100' : 'Electricity M212'}
+          </h1>
           <p className="text-zinc-400 text-sm mt-1">Complete record of daily production for the entire year</p>
         </div>
       </div>

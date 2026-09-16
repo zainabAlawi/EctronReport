@@ -6,16 +6,27 @@ import ReactECharts from 'echarts-for-react';
 
 export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxisData?: string[] }) {
   const options = {
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: 'Export Image',
+          pixelRatio: 2,
+          name: 'chart_export',
+          backgroundColor: '#18181b',
+          iconStyle: { borderColor: '#00a99d' }
+        }
+      }
+    },
     tooltip: { trigger: 'axis' },
     xAxis: {
       type: 'category',
       data: xAxisData || ['Shift 1', 'Shift 2', 'Shift 3', 'Official'],
-      axisLabel: { color: '#a1a1aa' },
+      axisLabel: { color: '#00a99d' },
     },
     yAxis: {
       type: 'value',
       axisLabel: { 
-        color: '#a1a1aa',
+        color: '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       },
       splitLine: { lineStyle: { color: '#27272a' } },
@@ -48,17 +59,28 @@ export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxi
 
 export function TargetVsActualChart({ categories, targetData, actualData }: { categories: string[], targetData: number[], actualData: number[] }) {
   const options = {
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: 'Export Image',
+          pixelRatio: 2,
+          name: 'chart_export',
+          backgroundColor: '#18181b',
+          iconStyle: { borderColor: '#00a99d' }
+        }
+      }
+    },
     tooltip: { trigger: 'axis' },
-    legend: { textStyle: { color: '#a1a1aa' }, top: 0 },
+    legend: { textStyle: { color: '#00a99d' }, top: 0 },
     xAxis: {
       type: 'category',
       data: categories || [],
-      axisLabel: { color: '#a1a1aa' },
+      axisLabel: { color: '#00a99d' },
     },
     yAxis: {
       type: 'value',
       axisLabel: { 
-        color: '#a1a1aa',
+        color: '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       },
       splitLine: { lineStyle: { color: '#27272a' } },
@@ -118,6 +140,17 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
   };
 
   const options = {
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: 'Export Image',
+          pixelRatio: 2,
+          name: 'chart_export',
+          backgroundColor: '#18181b',
+          iconStyle: { borderColor: '#00a99d' }
+        }
+      }
+    },
     series: [
       {
         type: 'gauge',
@@ -144,12 +177,12 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
         axisTick: { length: 12, lineStyle: { color: 'auto', width: 2 } },
         splitLine: { length: 20, lineStyle: { color: 'auto', width: 5 } },
         axisLabel: { 
-          color: '#a1a1aa', 
+          color: '#00a99d', 
           distance: -60, 
           fontSize: 14,
           formatter: function (value: number) { return Math.round(value) + ''; }
         },
-        title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: '#a1a1aa' } },
+        title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: '#00a99d' } },
         detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}', color: 'auto' },
         data: [{ value: achieved, name: 'Achieved' }]
       }
@@ -199,12 +232,23 @@ export function MonthlyAggregationChart({ dbData, division, year }: { dbData: an
   });
 
   const options = {
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: 'Export Image',
+          pixelRatio: 2,
+          name: 'chart_export',
+          backgroundColor: '#18181b',
+          iconStyle: { borderColor: '#00a99d' }
+        }
+      }
+    },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#a1a1aa' } },
+    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#00a99d' } },
     yAxis: { 
       type: 'value', 
       axisLabel: { 
-        color: '#a1a1aa',
+        color: '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       }, 
       splitLine: { lineStyle: { color: '#27272a' } } 
@@ -245,12 +289,23 @@ export function YearlyGrowthChart({ dbData, division }: { dbData: any[], divisio
   });
 
   const options = {
+    toolbox: {
+      feature: {
+        saveAsImage: {
+          title: 'Export Image',
+          pixelRatio: 2,
+          name: 'chart_export',
+          backgroundColor: '#18181b',
+          iconStyle: { borderColor: '#00a99d' }
+        }
+      }
+    },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: '#a1a1aa' } },
+    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: '#00a99d' } },
     yAxis: { 
       type: 'value', 
       axisLabel: { 
-        color: '#a1a1aa',
+        color: '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       }, 
       splitLine: { lineStyle: { color: '#27272a' } } 
