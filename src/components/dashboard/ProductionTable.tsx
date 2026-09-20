@@ -48,7 +48,7 @@ export default function ProductionTable({
     const failer = failers[key] || 0;
     const total = s1 + s2 + s3 + official;
     const percentage = target > 0 ? Number(((total / target) * 100).toFixed(1)) : 0;
-    return { department, target, shift1: s1 || '', shift2: s2 || '', shift3: s3 || '', failer: failer || '', total, percentage };
+    return { department, target, shift1: s1, shift2: s2, shift3: s3, failer: failer, total, percentage };
   };
 
   const dateObj = date ? new Date(date) : new Date();
