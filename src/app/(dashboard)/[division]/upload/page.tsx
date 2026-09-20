@@ -26,6 +26,7 @@ export default function UploadPage() {
   const [selectedHistory, setSelectedHistory] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const fetchHistory = async () => {
     try {
@@ -189,6 +190,7 @@ export default function UploadPage() {
       }
 
       setStatus('success');
+      setShowSuccessModal(true);
       fetchHistory(); 
     } catch (error) {
       console.error(error);
@@ -469,6 +471,39 @@ export default function UploadPage() {
           )}
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center text-center">
+            <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">تم رفع التقرير بنجاح!</h3>
+            <p className="text-zinc-400 mb-6 text-sm">
+              التقرير جاهز الآن في قاعدة البيانات.
+            </p>
+            <div className="flex flex-col gap-3 w-full">
+              <button
+                onClick={() => {
+                  setShowSuccessModal(false);
+                  setFile(null);
+                  setStatus('idle');
+                }}
+                className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg"
+              >
+                رفع تقرير آخر
+              </button>
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full py-2.5 rounded-lg border border-zinc-700 text-white font-medium hover:bg-zinc-800 transition-colors"
+              >
+                إلغاء / إغلاق
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
