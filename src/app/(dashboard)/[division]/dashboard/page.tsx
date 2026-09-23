@@ -59,7 +59,13 @@ export default async function DashboardPage(props: {
         if (shiftData.failers) {
           if (!dataForDate[s].failers) dataForDate[s].failers = {};
           Object.keys(shiftData.failers).forEach(fKey => {
-            dataForDate[s].failers[fKey] = (dataForDate[s].failers[fKey] || 0) + (shiftData.failers[fKey] || 0);
+            if (fKey === 'note') {
+              if (shiftData.failers.note) {
+                dataForDate[s].failers.note = dataForDate[s].failers.note ? dataForDate[s].failers.note + '\n' + shiftData.failers.note : shiftData.failers.note;
+              }
+            } else {
+              dataForDate[s].failers[fKey] = (dataForDate[s].failers[fKey] || 0) + (shiftData.failers[fKey] || 0);
+            }
           });
         }
 
@@ -291,7 +297,15 @@ export default async function DashboardPage(props: {
                     dataForDate 
                       ? Object.values(dataForDate).reduce((acc: any, shift: any) => {
                           if (shift.failers) {
-                            Object.keys(shift.failers).forEach(k => acc[k] = (acc[k] || 0) + shift.failers[k]);
+                            Object.keys(shift.failers).forEach(k => {
+                              if (k === 'note') {
+                                if (shift.failers.note) {
+                                  acc.note = acc.note ? acc.note + '\n' + shift.failers.note : shift.failers.note;
+                                }
+                              } else {
+                                acc[k] = (acc[k] || 0) + (shift.failers[k] || 0);
+                              }
+                            });
                           }
                           return acc;
                         }, {})

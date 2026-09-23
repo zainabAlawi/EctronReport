@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { division, date, shift, rows, filename, uploaderName, target } = body;
+    const { division, date, shift, rows, filename, uploaderName, target, note } = body;
 
     if (!division || !date || !shift || !Array.isArray(rows)) {
       return NextResponse.json({ error: 'Missing division, date, shift, or rows' }, { status: 400 });
@@ -59,9 +59,12 @@ export async function POST(request: Request) {
     let cards = 0;
 
     // Failers counts
-    let failers = {
+    let failers: any = {
       assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0
     };
+    if (note) {
+      failers.note = note;
+    }
 
     // Process rows based on division
     if (division === 'water') {

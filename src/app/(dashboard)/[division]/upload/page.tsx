@@ -16,8 +16,10 @@ export default function UploadPage() {
   const [shift, setShift] = useState('shift1');
   
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [allowDateTyping, setAllowDateTyping] = useState(false);
   const [uploaderName, setUploaderName] = useState('');
   const [dailyTarget, setDailyTarget] = useState('640');
+  const [note, setNote] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
@@ -182,7 +184,8 @@ export default function UploadPage() {
             rows: json,
             filename: file.name,
             uploaderName,
-            target: parseInt(dailyTarget) || 640
+            target: parseInt(dailyTarget) || 640,
+            note
           })
         });
 
@@ -261,7 +264,22 @@ export default function UploadPage() {
                 type="date" 
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100"
+                onClick={(e) => {
+                  if (!allowDateTyping) {
+                    try { e.currentTarget.showPicker(); } catch (err) {}
+                  }
+                }}
+                onDoubleClick={() => setAllowDateTyping(true)}
+                onBlur={() => setAllowDateTyping(false)}
+                onKeyDown={(e) => {
+                  if (!allowDateTyping && e.key !== 'Tab') {
+                    e.preventDefault();
+                  }
+                }}
+                className={clsx(
+                  "w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100",
+                  !allowDateTyping && "cursor-pointer"
+                )}
               />
             </div>
 
@@ -346,6 +364,19 @@ export default function UploadPage() {
             />
           </div>
         </div>
+
+        {/* Note / Remark */}
+        {uploadMode === 'daily' && (
+          <div>
+            <label className="text-sm font-medium text-zinc-300 mb-4 block">Note / Remark (ملاحظة)</label>
+            <textarea 
+              placeholder="Enter any notes or remarks for this day..."
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[100px] resize-y"
+            />
+          </div>
+        )}
 
         {/* Drag and Drop Zone */}
         <div

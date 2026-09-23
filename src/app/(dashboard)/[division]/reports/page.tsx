@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { Download, Printer } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
@@ -22,6 +22,9 @@ export default function ReportsPage() {
   const [dateFilter, setDateFilter] = useState('today');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  
+  const [allowStartDateTyping, setAllowStartDateTyping] = useState(false);
+  const [allowEndDateTyping, setAllowEndDateTyping] = useState(false);
 
   const years = ['2023', '2024', '2025', '2026', '2027'];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -100,7 +103,7 @@ export default function ReportsPage() {
   };
 
   const todayTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
-  const failersTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0 };
+  const failersTotals = { assembly: 0, perso: 0, lasering: 0, packaging: 0, cartons: 0, palets: 0, cards: 0, insolation: 0, radiation_frequency: 0, calibration: 0, multy_test: 0, metrology: 0, note: '' };
   
   dailyData.forEach(d => {
     // Totals for summary and steps efficiency
@@ -136,6 +139,13 @@ export default function ReportsPage() {
       failersTotals.calibration += (f.calibration || 0);
       failersTotals.multy_test += (f.multy_test || 0);
       failersTotals.metrology += (f.metrology || 0);
+      
+      if (f.note) {
+        // @ts-ignore
+        if (!failersTotals.note) failersTotals.note = f.note;
+        // @ts-ignore
+        else failersTotals.note += '\n' + f.note;
+      }
     }
 
     // Totals per shift for ProductionTable
@@ -224,7 +234,19 @@ export default function ReportsPage() {
                   setStartDate(e.target.value);
                   setDateFilter('custom');
                 }}
-                className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+                onClick={(e) => {
+                  if (!allowStartDateTyping) {
+                    try { e.currentTarget.showPicker(); } catch (err) {}
+                  }
+                }}
+                onDoubleClick={() => setAllowStartDateTyping(true)}
+                onBlur={() => setAllowStartDateTyping(false)}
+                onKeyDown={(e) => {
+                  if (!allowStartDateTyping && e.key !== 'Tab') {
+                    e.preventDefault();
+                  }
+                }}
+                className={`bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50 ${!allowStartDateTyping ? 'cursor-pointer' : ''}`}
               />
               <span className="text-zinc-500">-</span>
               <input 
@@ -234,7 +256,19 @@ export default function ReportsPage() {
                   setEndDate(e.target.value);
                   setDateFilter('custom');
                 }}
-                className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+                onClick={(e) => {
+                  if (!allowEndDateTyping) {
+                    try { e.currentTarget.showPicker(); } catch (err) {}
+                  }
+                }}
+                onDoubleClick={() => setAllowEndDateTyping(true)}
+                onBlur={() => setAllowEndDateTyping(false)}
+                onKeyDown={(e) => {
+                  if (!allowEndDateTyping && e.key !== 'Tab') {
+                    e.preventDefault();
+                  }
+                }}
+                className={`bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50 ${!allowEndDateTyping ? 'cursor-pointer' : ''}`}
               />
             </div>
           </div>
@@ -265,8 +299,8 @@ export default function ReportsPage() {
 
       <div className="glass rounded-2xl p-6 border border-border min-h-[400px]">
         {activeTab === 'Daily' && <DailyReport division={division} totals={todayTotals} date={startDate === endDate ? startDate : `${startDate} to ${endDate}`} target={rangeTarget} shiftData={shiftTotals} failersData={failersTotals} />}
-        {activeTab === 'Weekly' && <WeeklyReport dbData={dbData} division={division} year={selectedYear} month={selectedMonth} />}
-        {activeTab === 'Monthly' && <MonthlyReport dbData={dbData} division={division} year={selectedYear} />}
+        {activeTab === 'Weekly' && <WeeklyReport dbData={dbData} division={division} year={selectedYear} month={selectedMonth} target={latestTarget} />}
+        {activeTab === 'Monthly' && <MonthlyReport dbData={dbData} division={division} year={selectedYear} target={latestTarget} />}
         {activeTab === 'Yearly' && <YearlyReport dbData={dbData} division={division} />}
       </div>
     </div>
@@ -363,7 +397,7 @@ function StepBox({ name, value, status }: { name: string, value: string, status:
   );
 }
 
-function WeeklyReport({ dbData, division, year, month }: { dbData: any[], division: string, year: string, month: string }) {
+function WeeklyReport({ dbData, division, year, month, target }: { dbData: any[], division: string, year: string, month: string, target: number }) {
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
   
@@ -397,10 +431,224 @@ function WeeklyReport({ dbData, division, year, month }: { dbData: any[], divisi
       }
     ]
   };
-  return <div className="h-full"><h3 className="text-lg font-semibold text-white mb-4">Weekly Production - {monthName} {year}</h3><ReactECharts option={options} style={{ height: '300px' }} /></div>;
+
+  const numDays = new Date(parseInt(year), parseInt(month) + 1, 0).getDate();
+  const monthDates = Array.from({ length: numDays }, (_, i) => {
+    const d = new Date(parseInt(year), parseInt(month), i + 1);
+    const offset = d.getTimezoneOffset();
+    const adjustedDate = new Date(d.getTime() - (offset * 60 * 1000));
+    return {
+      dateStr: adjustedDate.toISOString().split('T')[0],
+      dayName: d.toLocaleDateString('en-US', { weekday: 'long' }),
+      formattedDate: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' }).replace(/ /g, '-')
+    };
+  });
+
+  const getStatusColor = (percentage: number) => {
+    if (percentage >= 98) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    if (percentage >= 90) return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    return 'text-danger bg-danger/10 border-danger/20';
+  };
+
+  const getStatusDot = (percentage: number) => {
+    if (percentage >= 98) return '🟢';
+    if (percentage >= 90) return '🟡';
+    return '🔴';
+  };
+
+  const getStepDataForDate = (dateStr: string, stepId: string) => {
+    let shift1 = 0, shift2 = 0, shift3 = 0, official = 0, failer = 0;
+    dbData.forEach(d => {
+      if (d.date === dateStr) {
+        const val = d[stepId] || 0;
+        if (d.shift === 'shift1') shift1 += val;
+        else if (d.shift === 'shift2') shift2 += val;
+        else if (d.shift === 'shift3') shift3 += val;
+        else official += val;
+
+        if (d.failers) {
+          let f = d.failers;
+          if (typeof f === 'string') { try { f = JSON.parse(f); } catch (e) {} }
+          if (f && f[stepId]) failer += (f[stepId] || 0);
+        }
+      }
+    });
+    const total = shift1 + shift2 + shift3 + official;
+    const stepTarget = stepId === 'cartons' ? Math.round(target / 10) : (stepId === 'palets' ? 1 : target);
+    const percentage = stepTarget > 0 ? Number(((total / stepTarget) * 100).toFixed(1)) : 0;
+    return { target: stepTarget, total, shift1: shift1 + official, shift2, shift3, failer, percentage };
+  };
+
+  const getNoteForDate = (dateStr: string) => {
+    let noteStr = '';
+    dbData.forEach(d => {
+      if (d.date === dateStr && d.failers) {
+        let f = d.failers;
+        if (typeof f === 'string') { try { f = JSON.parse(f); } catch (e) {} }
+        if (f && f.note) noteStr += (noteStr ? '\n' : '') + f.note;
+      }
+    });
+    return noteStr;
+  };
+
+  const steps = isWater ? [
+    { id: 'assembly', label: 'Assembly' },
+    { id: 'perso', label: 'Perso' },
+    { id: 'lasering', label: 'Lasering' },
+    { id: 'packaging', label: 'Packaging' },
+    { id: 'cartons', label: 'Cartons' },
+    { id: 'palets', label: 'Palets' },
+  ] : [
+    { id: 'assembly', label: 'Assembly' },
+    { id: 'insolation', label: 'Insolation' },
+    { id: 'radiation_frequency', label: 'Radiation Frequency' },
+    { id: 'calibration', label: 'Calibration' },
+    { id: 'multy_test', label: 'Multy test' },
+    { id: 'metrology', label: 'Metrology' },
+    { id: 'perso', label: 'Perso' },
+    { id: 'cards', label: 'Cards' },
+  ];
+
+  const thBase = "py-1.5 px-2 text-xs font-semibold border-r text-center whitespace-nowrap";
+  const tdBase = "py-1 px-2 text-[13px] font-medium border-r text-center whitespace-nowrap";
+  const borderClass = "border-zinc-800";
+
+  return (
+    <div className="flex flex-col gap-8 h-full">
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-4">Weekly Production - {monthName} {year}</h3>
+        <ReactECharts option={options} style={{ height: '300px' }} />
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <h4 className="text-sm text-zinc-400 mb-3 font-medium">Detailed Production Table (Horizontal Scroll)</h4>
+        <div className="w-full overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 custom-scrollbar pb-2">
+          <table className="w-full text-left border-collapse min-w-max">
+            <thead>
+              <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                <th className="py-2 px-3 text-sm font-bold text-white sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Day
+                </th>
+                {monthDates.map(d => {
+                  const isWeekend = d.dayName === 'Friday' || d.dayName === 'Saturday';
+                  return (
+                    <th key={`day-${d.dateStr}`} colSpan={7} className={clsx(
+                      "py-2 px-3 text-sm font-semibold text-white text-center border-r-[3px] border-r-white/80",
+                      isWeekend && "bg-zinc-800/60"
+                    )}>
+                      {d.dayName}
+                    </th>
+                  );
+                })}
+              </tr>
+              <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                <th className="py-1.5 px-3 text-sm font-bold text-zinc-300 sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Date
+                </th>
+                {monthDates.map(d => {
+                  const isWeekend = d.dayName === 'Friday' || d.dayName === 'Saturday';
+                  return (
+                    <th key={`date-${d.dateStr}`} colSpan={7} className={clsx(
+                      "py-1.5 px-3 text-xs font-semibold text-zinc-300 text-center border-r-[3px] border-r-white/80",
+                      isWeekend && "bg-zinc-800/60"
+                    )}>
+                      {d.formattedDate}
+                    </th>
+                  );
+                })}
+              </tr>
+              <tr className="border-b border-zinc-800 bg-zinc-900/40">
+                <th className="py-1.5 px-3 text-sm font-bold text-zinc-300 sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Note
+                </th>
+                {monthDates.map(d => {
+                  const isWeekend = d.dayName === 'Friday' || d.dayName === 'Saturday';
+                  const note = getNoteForDate(d.dateStr);
+                  return (
+                    <th key={`note-${d.dateStr}`} colSpan={7} className={clsx(
+                      "py-1.5 px-3 text-xs font-medium text-zinc-300 text-center border-r-[3px] border-r-white/80 whitespace-pre-wrap font-normal align-top min-w-[100px]",
+                      isWeekend && "bg-zinc-800/60"
+                    )}>
+                      {note || '-'}
+                    </th>
+                  );
+                })}
+              </tr>
+              <tr className="border-b border-zinc-800 bg-zinc-900/80">
+                <th className="py-1.5 px-3 text-sm font-semibold text-zinc-200 sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Step
+                </th>
+                {monthDates.map(d => {
+                  const isWeekend = d.dayName === 'Friday' || d.dayName === 'Saturday';
+                  const bgClass = isWeekend ? "bg-zinc-800/60" : "";
+                  return (
+                    <React.Fragment key={`headers-${d.dateStr}`}>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-zinc-400")}>Target</th>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-white")}>Total</th>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-zinc-400")}>Shift 1</th>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-zinc-400")}>Shift 2</th>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-zinc-400")}>Shift 3</th>
+                      <th className={clsx(thBase, borderClass, bgClass, "text-red-400/80")}>Failer</th>
+                      <th className={clsx(thBase, bgClass, "text-zinc-300 border-r-[3px] border-r-white/80")}>%</th>
+                    </React.Fragment>
+                  );
+                })}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {steps.map(step => (
+                <tr key={step.id} className="hover:bg-zinc-800/30 transition-colors bg-zinc-900/10">
+                  <td className="py-1.5 px-3 text-[13px] font-medium text-zinc-200 sticky left-0 z-20 border-r border-zinc-800 bg-zinc-900 whitespace-nowrap min-w-[130px]">
+                    <div className="flex items-center gap-2 h-full">
+                      <span className="text-[9px]">
+                        {(() => {
+                          let totalSum = 0; let targetSum = 0;
+                          monthDates.forEach(d => {
+                            const data = getStepDataForDate(d.dateStr, step.id);
+                            totalSum += data.total; targetSum += data.target;
+                          });
+                          const avg = targetSum > 0 ? (totalSum / targetSum) * 100 : 0;
+                          return getStatusDot(avg);
+                        })()}
+                      </span>
+                      {step.label}
+                    </div>
+                  </td>
+                  {monthDates.map(d => {
+                    const data = getStepDataForDate(d.dateStr, step.id);
+                    const isWeekend = d.dayName === 'Friday' || d.dayName === 'Saturday';
+                    const bgClass = isWeekend ? "bg-zinc-800/40" : "";
+                    const totalBg = isWeekend ? "bg-zinc-700/40" : "bg-zinc-800/20";
+                    return (
+                      <React.Fragment key={`${step.id}-${d.dateStr}`}>
+                        <td className={clsx(tdBase, borderClass, bgClass, "text-zinc-400")}>{data.target}</td>
+                        <td className={clsx(tdBase, borderClass, totalBg, "text-white font-bold")}>{data.total}</td>
+                        <td className={clsx(tdBase, borderClass, bgClass, "text-zinc-400")}>{data.shift1}</td>
+                        <td className={clsx(tdBase, borderClass, bgClass, "text-zinc-400")}>{data.shift2}</td>
+                        <td className={clsx(tdBase, borderClass, bgClass, "text-zinc-400")}>{data.shift3}</td>
+                        <td className={clsx(tdBase, borderClass, bgClass, "text-red-400/80")}>{data.failer}</td>
+                        <td className={clsx(tdBase, bgClass, "border-r-[3px] border-r-white/80")}>
+                          <span className={clsx(
+                            "inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium border",
+                            getStatusColor(data.percentage)
+                          )}>
+                            {data.percentage}%
+                          </span>
+                        </td>
+                      </React.Fragment>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function MonthlyReport({ dbData, division, year }: { dbData: any[], division: string, year: string }) {
+function MonthlyReport({ dbData, division, year, target }: { dbData: any[], division: string, year: string, target: number }) {
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
   
@@ -412,13 +660,167 @@ function MonthlyReport({ dbData, division, year }: { dbData: any[], division: st
     }
   });
 
+  const monthsList = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  
   const options = {
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#a1a1aa' } },
     yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
     series: [{ type: 'line', data: data, label: { show: true, position: 'top', color: '#fff' }, itemStyle: { color: '#10b981' }, smooth: true, areaStyle: { opacity: 0.1 } }]
   };
-  return <div className="h-full"><h3 className="text-lg font-semibold text-white mb-4">Monthly Production - {year}</h3><ReactECharts option={options} style={{ height: '300px' }} /></div>;
+
+  const getStatusColor = (percentage: number) => {
+    if (percentage >= 98) return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+    if (percentage >= 90) return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+    return 'text-danger bg-danger/10 border-danger/20';
+  };
+
+  const getStatusDot = (percentage: number) => {
+    if (percentage >= 98) return '🟢';
+    if (percentage >= 90) return '🟡';
+    return '🔴';
+  };
+
+  const getStepDataForMonth = (monthIndex: number, stepId: string) => {
+    let shift1 = 0, shift2 = 0, shift3 = 0, official = 0, failer = 0;
+    const monthData = dbData.filter(d => {
+      if (!d.date) return false;
+      const dt = new Date(d.date);
+      return dt.getFullYear().toString() === year && dt.getMonth() === monthIndex;
+    });
+
+    monthData.forEach(d => {
+      const val = d[stepId] || 0;
+      if (d.shift === 'shift1') shift1 += val;
+      else if (d.shift === 'shift2') shift2 += val;
+      else if (d.shift === 'shift3') shift3 += val;
+      else official += val;
+
+      if (d.failers) {
+        let f = d.failers;
+        if (typeof f === 'string') { try { f = JSON.parse(f); } catch (e) {} }
+        if (f && f[stepId]) failer += (f[stepId] || 0);
+      }
+    });
+
+    const total = shift1 + shift2 + shift3 + official;
+    const daysInMonth = new Date(parseInt(year), monthIndex + 1, 0).getDate();
+    const dailyStepTarget = stepId === 'cartons' ? Math.round(target / 10) : (stepId === 'palets' ? 1 : target);
+    const stepTarget = dailyStepTarget * daysInMonth; 
+
+    const percentage = stepTarget > 0 ? Number(((total / stepTarget) * 100).toFixed(1)) : 0;
+    return { target: stepTarget, total, shift1: shift1 + official, shift2, shift3, failer, percentage };
+  };
+
+  const steps = isWater ? [
+    { id: 'assembly', label: 'Assembly' },
+    { id: 'perso', label: 'Perso' },
+    { id: 'lasering', label: 'Lasering' },
+    { id: 'packaging', label: 'Packaging' },
+    { id: 'cartons', label: 'Cartons' },
+    { id: 'palets', label: 'Palets' },
+  ] : [
+    { id: 'assembly', label: 'Assembly' },
+    { id: 'insolation', label: 'Insolation' },
+    { id: 'radiation_frequency', label: 'Radiation Frequency' },
+    { id: 'calibration', label: 'Calibration' },
+    { id: 'multy_test', label: 'Multy test' },
+    { id: 'metrology', label: 'Metrology' },
+    { id: 'perso', label: 'Perso' },
+    { id: 'cards', label: 'Cards' },
+  ];
+
+  const thBase = "py-1.5 px-2 text-xs font-semibold border-r text-center whitespace-nowrap";
+  const tdBase = "py-1 px-2 text-[13px] font-medium border-r text-center whitespace-nowrap";
+  const borderClass = "border-zinc-800";
+
+  return (
+    <div className="flex flex-col gap-8 h-full">
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-4">Monthly Production - {year}</h3>
+        <ReactECharts option={options} style={{ height: '300px' }} />
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <h4 className="text-sm text-zinc-400 mb-3 font-medium">Detailed Monthly Table (Horizontal Scroll)</h4>
+        <div className="w-full overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 custom-scrollbar pb-2">
+          <table className="w-full text-left border-collapse min-w-max">
+            <thead>
+              <tr className="border-b border-zinc-800 bg-zinc-900/50">
+                <th className="py-2 px-3 text-sm font-bold text-white sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Month
+                </th>
+                {monthsList.map((monthName, i) => (
+                  <th key={`month-${i}`} colSpan={7} className="py-2 px-3 text-sm font-semibold text-white text-center border-r-[3px] border-r-white/80">
+                    {monthName}
+                  </th>
+                ))}
+              </tr>
+              <tr className="border-b border-zinc-800 bg-zinc-900/80">
+                <th className="py-1.5 px-3 text-sm font-semibold text-zinc-200 sticky left-0 z-30 border-r border-zinc-800 bg-zinc-900">
+                  Step
+                </th>
+                {monthsList.map((_, i) => (
+                  <React.Fragment key={`headers-${i}`}>
+                    <th className={`${thBase} ${borderClass} text-zinc-400`}>Target</th>
+                    <th className={`${thBase} ${borderClass} text-white`}>Total</th>
+                    <th className={`${thBase} ${borderClass} text-zinc-400`}>Shift 1</th>
+                    <th className={`${thBase} ${borderClass} text-zinc-400`}>Shift 2</th>
+                    <th className={`${thBase} ${borderClass} text-zinc-400`}>Shift 3</th>
+                    <th className={`${thBase} ${borderClass} text-red-400/80`}>Failer</th>
+                    <th className={`${thBase} text-zinc-300 border-r-[3px] border-r-white/80`}>%</th>
+                  </React.Fragment>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {steps.map(step => (
+                <tr key={step.id} className="hover:bg-zinc-800/30 transition-colors bg-zinc-900/10">
+                  <td className="py-1.5 px-3 text-[13px] font-medium text-zinc-200 sticky left-0 z-20 border-r border-zinc-800 bg-zinc-900 whitespace-nowrap min-w-[130px]">
+                    <div className="flex items-center gap-2 h-full">
+                      <span className="text-[9px]">
+                        {(() => {
+                          let totalSum = 0; let targetSum = 0;
+                          monthsList.forEach((_, i) => {
+                            const data = getStepDataForMonth(i, step.id);
+                            totalSum += data.total; targetSum += data.target;
+                          });
+                          const avg = targetSum > 0 ? (totalSum / targetSum) * 100 : 0;
+                          return getStatusDot(avg);
+                        })()}
+                      </span>
+                      {step.label}
+                    </div>
+                  </td>
+                  {monthsList.map((_, i) => {
+                    const data = getStepDataForMonth(i, step.id);
+                    return (
+                      <React.Fragment key={`${step.id}-${i}`}>
+                        <td className={`${tdBase} ${borderClass} text-zinc-400`}>{data.target}</td>
+                        <td className={`${tdBase} ${borderClass} bg-zinc-800/20 text-white font-bold`}>{data.total}</td>
+                        <td className={`${tdBase} ${borderClass} text-zinc-400`}>{data.shift1}</td>
+                        <td className={`${tdBase} ${borderClass} text-zinc-400`}>{data.shift2}</td>
+                        <td className={`${tdBase} ${borderClass} text-zinc-400`}>{data.shift3}</td>
+                        <td className={`${tdBase} ${borderClass} text-red-400/80`}>{data.failer}</td>
+                        <td className={`${tdBase} border-r-[3px] border-r-white/80`}>
+                          <span className={clsx(
+                            "inline-flex items-center px-1.5 py-0.5 rounded-sm text-[10px] font-medium border",
+                            getStatusColor(data.percentage)
+                          )}>
+                            {data.percentage}%
+                          </span>
+                        </td>
+                      </React.Fragment>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function YearlyReport({ dbData, division }: { dbData: any[], division: string }) {

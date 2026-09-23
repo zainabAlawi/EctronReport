@@ -11,6 +11,9 @@ export default function TableDateRangePicker() {
   const [dateFilter, setDateFilter] = useState(searchParams.get('dateFilter') || 'today');
   const [startDate, setStartDate] = useState(searchParams.get('startDate') || '');
   const [endDate, setEndDate] = useState(searchParams.get('endDate') || '');
+  
+  const [allowStartDateTyping, setAllowStartDateTyping] = useState(false);
+  const [allowEndDateTyping, setAllowEndDateTyping] = useState(false);
 
 
   const updateUrl = (start: string, end: string, filter: string) => {
@@ -99,14 +102,38 @@ export default function TableDateRangePicker() {
           type="date" 
           value={startDate}
           onChange={e => handleStartDateChange(e.target.value)}
-          className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+          onClick={(e) => {
+            if (!allowStartDateTyping) {
+              try { e.currentTarget.showPicker(); } catch (err) {}
+            }
+          }}
+          onDoubleClick={() => setAllowStartDateTyping(true)}
+          onBlur={() => setAllowStartDateTyping(false)}
+          onKeyDown={(e) => {
+            if (!allowStartDateTyping && e.key !== 'Tab') {
+              e.preventDefault();
+            }
+          }}
+          className={`bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50 ${!allowStartDateTyping ? 'cursor-pointer' : ''}`}
         />
         <span className="text-zinc-500">-</span>
         <input 
           type="date" 
           value={endDate}
           onChange={e => handleEndDateChange(e.target.value)}
-          className="bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50"
+          onClick={(e) => {
+            if (!allowEndDateTyping) {
+              try { e.currentTarget.showPicker(); } catch (err) {}
+            }
+          }}
+          onDoubleClick={() => setAllowEndDateTyping(true)}
+          onBlur={() => setAllowEndDateTyping(false)}
+          onKeyDown={(e) => {
+            if (!allowEndDateTyping && e.key !== 'Tab') {
+              e.preventDefault();
+            }
+          }}
+          className={`bg-zinc-800/50 border border-zinc-700 text-zinc-300 text-sm rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500/50 ${!allowEndDateTyping ? 'cursor-pointer' : ''}`}
         />
       </div>
     </div>

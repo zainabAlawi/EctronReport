@@ -95,6 +95,12 @@ export default function ProductionTable({
               <th className="py-3 px-4 text-sm font-semibold text-teal-100 border-r border-teal-800/50">Date</th>
               <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-teal-100 text-center">{dateString}</th>
             </tr>
+            {failers.note && (
+              <tr className="border-b border-teal-800/50 bg-teal-900/40">
+                <th className="py-3 px-4 text-sm font-semibold text-teal-100 border-r border-teal-800/50">Note / ملاحظة</th>
+                <th colSpan={7} className="py-3 px-4 text-sm font-medium text-teal-100 text-center font-normal whitespace-pre-wrap text-left">{failers.note}</th>
+              </tr>
+            )}
             <tr className="border-b border-teal-800/50 bg-teal-950/40">
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50">Step</th>
               <th className="py-3 px-4 text-sm font-semibold text-teal-200 border-r border-teal-800/50 text-center">Target</th>
@@ -162,6 +168,12 @@ export default function ProductionTable({
             <th className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium border-r border-zinc-800/50">Date</th>
             <th colSpan={7} className="py-3 px-4 text-sm font-semibold text-white print:text-black font-medium text-center">{dateString}</th>
           </tr>
+          {failers.note && (
+            <tr className="border-b border-zinc-800/50 bg-zinc-800/40">
+              <th className="py-3 px-4 text-sm font-semibold text-zinc-300 print:text-[#1b497f] border-r border-zinc-800/50">Note / ملاحظة</th>
+              <th colSpan={7} className="py-3 px-4 text-sm font-medium text-zinc-300 print:text-black text-center font-normal whitespace-pre-wrap text-left">{failers.note}</th>
+            </tr>
+          )}
           <tr className="border-b border-zinc-800 bg-zinc-900/80">
             <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800">Step</th>
             <th className="py-3 px-4 text-sm font-semibold text-zinc-100 print:text-[#1b497f] font-semibold border-r border-zinc-800 text-center">Target</th>

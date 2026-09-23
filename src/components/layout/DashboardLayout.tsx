@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase-server';
-import Sidebar from './Sidebar';
-import TopNav from './TopNav';
+import ClientLayoutShell from './ClientLayoutShell';
 import { redirect } from 'next/navigation';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -54,20 +53,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Sidebar userPermissions={permissions} roleName={roleName} />
-      <div className="pl-64 print:pl-0 flex flex-col min-h-screen">
-        <TopNav profile={profile} roleName={roleName} />
-        <main className="flex-1 p-6 relative">
-          {/* Subtle background glow */}
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
-          
-          <div className="relative z-10">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
+    <ClientLayoutShell 
+      userPermissions={permissions} 
+      roleName={roleName} 
+      profile={profile}
+    >
+      {children}
+    </ClientLayoutShell>
   );
 }
