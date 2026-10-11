@@ -33,6 +33,12 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# temporary scripts and scratch
+check_buckets.js
+init_bucket.js
+test_upload.js
+scratch/
+
 # vercel
 .vercel
 

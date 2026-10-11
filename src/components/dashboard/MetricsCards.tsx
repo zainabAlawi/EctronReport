@@ -55,7 +55,16 @@ export default function MetricsCards({ metrics }: { metrics: MetricsProps }) {
   );
 }
 
-function MetricCard({ title, value, icon: Icon, color, bg, glow = "" }: any) {
+interface MetricCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  glow?: string;
+}
+
+function MetricCard({ title, value, icon: Icon, color, bg, glow = "" }: MetricCardProps) {
   return (
     <div className={clsx("p-5 rounded-2xl glass border border-border flex items-center gap-4", glow)}>
       <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center", bg)}>

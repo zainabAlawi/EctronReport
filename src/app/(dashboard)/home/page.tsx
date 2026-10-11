@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Zap, Droplet, PlusCircle, Building2 } from 'lucide-react';
+import { Zap, Droplet, PlusCircle, Building2, Banknote } from 'lucide-react';
 
 export default function HomePage() {
   const divisions = [
@@ -29,6 +29,15 @@ export default function HomePage() {
       bgClass: 'bg-blue-500/10',
       borderClass: 'border-blue-500/20',
       iconColor: 'text-blue-400',
+    },
+    {
+      id: 'petty-cash',
+      name: 'إدارة النقديات (Petty Cash)',
+      icon: Banknote,
+      color: 'from-purple-400 to-fuchsia-500',
+      bgClass: 'bg-purple-500/10',
+      borderClass: 'border-purple-500/20',
+      iconColor: 'text-purple-400',
     }
   ];
 

@@ -13,7 +13,8 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Menu
+  Menu,
+  BarChart3
 } from 'lucide-react';
 import clsx from 'clsx';
 import { createClient } from '@/lib/supabase';
@@ -31,7 +32,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
   
   // Extract division from pathname (e.g. /water/dashboard -> water)
   const parts = pathname.split('/');
-  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity' || parts[1] === 'electricity-ecs1100') ? parts[1] : 'electricity'; 
+  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity' || parts[1] === 'electricity-ecs1100' || parts[1] === 'petty-cash') ? parts[1] : 'electricity'; 
 
   const hasPermission = (key: string) => {
     if (roleName === 'Admin') return true;
@@ -40,13 +41,24 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
 
   const isHome = pathname === '/home' || pathname === '/coming-soon';
   
-  const navItems = [
-    { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `${division}_dashboard` },
-    { name: 'Reports', href: '/reports', icon: FileText, permission: `${division}_reports` },
-    { name: 'Upload Data', href: '/upload', icon: UploadCloud, permission: `${division}_daily_entry` },
-    { name: 'AI Analysis', href: '/analysis', icon: BrainCircuit, permission: `${division}_reports` },
-  ];
+  let navItems = [];
+
+  if (division === 'petty-cash') {
+    navItems = [
+      { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `petty_cash_dashboard` },
+      { name: 'Employee Settlement', href: '/settlement', icon: Users, permission: `petty_cash_expenses` },
+      { name: 'Analysis', href: '/analysis', icon: BarChart3, permission: `petty_cash_dashboard` },
+    ];
+  } else {
+    navItems = [
+      { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
+      { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `${division}_dashboard` },
+      { name: 'Reports', href: '/reports', icon: FileText, permission: `${division}_reports` },
+      { name: 'Upload Data', href: '/upload', icon: UploadCloud, permission: `${division}_daily_entry` },
+      { name: 'AI Analysis', href: '/analysis', icon: BrainCircuit, permission: `${division}_reports` },
+    ];
+  }
 
   // Admin items
   if (roleName === 'Admin' || userPermissions.includes('admin_panel')) {
@@ -76,7 +88,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
             ECTRON Smart 
             {!isHome && !pathname.startsWith('/admin') && (
               <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">
-                {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : 'M212'}
+                {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : division === 'petty-cash' ? 'Petty Cash' : 'M212'}
               </span>
             )}
           </h1>

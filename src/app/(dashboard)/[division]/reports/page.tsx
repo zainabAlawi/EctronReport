@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { Download, Printer } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
 import ProductionTable from '@/components/dashboard/ProductionTable';
+import * as XLSX from 'xlsx';
 
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -174,6 +175,31 @@ export default function ReportsPage() {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // inclusive
   const rangeTarget = latestTarget * (diffDays || 1);
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const exportToExcel = () => {
+    let dataToExport = dbData;
+    if (activeTab === 'Daily') {
+      dataToExport = dailyData;
+    } else if (activeTab === 'Weekly' || activeTab === 'Monthly') {
+      dataToExport = dbData.filter(d => {
+        if (!d.date) return false;
+        const dt = new Date(d.date);
+        if (activeTab === 'Weekly') {
+          return dt.getFullYear().toString() === selectedYear && dt.getMonth().toString() === selectedMonth;
+        }
+        return dt.getFullYear().toString() === selectedYear;
+      });
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, `${activeTab} Report`);
+    XLSX.writeFile(workbook, `${division}_${activeTab.toLowerCase()}_report.xlsx`);
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -182,13 +208,13 @@ export default function ReportsPage() {
           <p className="text-zinc-400 text-sm mt-1">Analyze production trends over time</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium hover:bg-zinc-700 transition-colors border border-zinc-700">
+          <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium hover:bg-zinc-700 transition-colors border border-zinc-700">
             <Printer className="w-4 h-4" /> Print Report
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">
             <Download className="w-4 h-4" /> Export PDF
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+          <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
             <Download className="w-4 h-4" /> Export Excel
           </button>
         </div>
