@@ -1,13 +1,18 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-border: var(--border);
-  
-  --color-success: #10b981;
+
+  --color-ectron-navy: #1b497f;
+  --color-ectron-teal: #00a99d;
+
+  --color-success: #00a99d;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
@@ -15,12 +20,42 @@
   --font-mono: var(--font-geist-mono);
 }
 
-:root {
-  --background: #09090b; /* Deep dark background */
+:root,
+html.dark {
+  --background: #09090b; /* Original Deep dark background */
   --foreground: #fafafa;
   --card: #18181b;
   --card-foreground: #fafafa;
   --border: #27272a;
+}
+
+html.light {
+  /* Enterprise SaaS Light Mode Palette */
+  --background: #F8FAFC;
+  --foreground: #475569;
+  --heading: #173B63;
+  --card: #FFFFFF;
+  --card-foreground: #475569;
+  --sidebar: #FFFFFF;
+  --topnav: #FFFFFF;
+  --primary-teal: #0F766E;
+  --accent-turquoise: #14B8A6;
+  --border: #E2E8F0;
+  --hover-bg: #F0FDFA;
+  --active-nav: #CCFBF1;
+  --active-nav-text: #0F766E;
+
+  /* Harmonized Zinc scale mapping for Light Mode components */
+  --color-zinc-950: #F8FAFC;
+  --color-zinc-900: #FFFFFF;
+  --color-zinc-800: #F1F5F9;
+  --color-zinc-700: #E2E8F0;
+  --color-zinc-600: #CBD5E1;
+  --color-zinc-500: #64748B;
+  --color-zinc-400: #475569;
+  --color-zinc-300: #334155;
+  --color-zinc-200: #173B63;
+  --color-zinc-100: #173B63;
 }
 
 body {
@@ -29,14 +64,119 @@ body {
   font-family: var(--font-sans), sans-serif;
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility (Original Dark Mode) */
 .glass {
   background: rgba(24, 24, 27, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Custom scrollbar */
+/* Clean White Card Surface in Light Mode */
+html.light .glass {
+  background: #FFFFFF;
+  backdrop-filter: none;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+}
+
+/* Modern Turquoise-to-Teal Gradient for Light Mode interactive highlights */
+html.light .btn-primary-gradient {
+  background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px -1px rgba(15, 118, 110, 0.3);
+}
+
+html.light .btn-primary-gradient:hover {
+  background: linear-gradient(135deg, #0D9488 0%, #115E59 100%);
+  box-shadow: 0 4px 12px -1px rgba(15, 118, 110, 0.4);
+}
+
+html.light .btn-primary-gradient * {
+  color: #FFFFFF !important;
+}
+
+/* Light Mode Typography & Surface Overrides:
+   Convert .text-white elements to Main Headings color (#173B63) in Light Mode */
+html.light .text-white {
+  color: #173B63;
+}
+
+/* Keep white text inside solid dark/accent backgrounds in Light Mode */
+html.light .bg-blue-600,
+html.light .bg-blue-500,
+html.light .bg-indigo-600,
+html.light .bg-indigo-500,
+html.light .bg-teal-700,
+html.light .bg-teal-600,
+html.light .bg-teal-500,
+html.light .bg-emerald-600,
+html.light .bg-emerald-500,
+html.light .bg-purple-600,
+html.light .bg-amber-600,
+html.light .bg-danger,
+html.light .bg-red-600,
+html.light .bg-\[\#0F766E\],
+html.light .bg-\[\#14B8A6\],
+html.light .bg-\[\#173B63\],
+html.light .from-\[\#14B8A6\],
+html.light .from-\[\#0F766E\],
+html.light .from-blue-600,
+html.light .from-\[\#1b497f\] {
+  color: #ffffff !important;
+}
+
+html.light .bg-blue-600 *,
+html.light .bg-blue-500 *,
+html.light .bg-indigo-600 *,
+html.light .bg-indigo-500 *,
+html.light .bg-teal-700 *,
+html.light .bg-teal-600 *,
+html.light .bg-teal-500 *,
+html.light .bg-emerald-600 *,
+html.light .bg-emerald-500 *,
+html.light .bg-purple-600 *,
+html.light .bg-amber-600 *,
+html.light .bg-danger *,
+html.light .bg-red-600 *,
+html.light .bg-\[\#0F766E\] *,
+html.light .bg-\[\#14B8A6\] *,
+html.light .bg-\[\#173B63\] *,
+html.light .from-\[\#14B8A6\] *,
+html.light .from-\[\#0F766E\] *,
+html.light .from-blue-600 *,
+html.light .from-\[\#1b497f\] * {
+  color: #ffffff !important;
+}
+
+/* Improved WCAG AA Status Text Contrast in Light Mode only */
+html.light .text-emerald-400 {
+  color: #059669;
+}
+html.light .text-yellow-400,
+html.light .text-amber-400 {
+  color: #D97706;
+}
+html.light .text-blue-400 {
+  color: #2563EB;
+}
+html.light .text-purple-400 {
+  color: #7C3AED;
+}
+html.light .text-red-400 {
+  color: #DC2626;
+}
+
+/* Light mode borders in tables */
+html.light .border-r-white\/80 {
+  border-right-color: #CBD5E1 !important;
+}
+
+/* Table row hover in Light Mode only */
+html.light tbody tr:hover {
+  background-color: #F0FDFA;
+}
+
+/* Custom scrollbar (Original Dark Mode + Light Mode) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -52,7 +192,19 @@ body {
   background: #52525b;
 }
 
-input[type="date"]::-webkit-calendar-picker-indicator {
+html.light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
+  cursor: pointer;
+}
+
+html.light input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
   cursor: pointer;
 }

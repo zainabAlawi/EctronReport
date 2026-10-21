@@ -223,23 +223,23 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto flex flex-col gap-8 py-8 relative">
+    <div className="max-w-4xl mx-auto flex flex-col gap-8 py-6 relative">
       <div>
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-[#173B63] dark:text-white">
           Data Entry - {division === 'water' ? 'Water Siconia' : division === 'electricity-ecs1100' ? 'Electricity ECS1100' : 'Electricity M212'}
         </h1>
-        <p className="text-zinc-400">Import Excel, CSV, or PDF files to automatically update the dashboard metrics.</p>
+        <p className="text-[#475569] dark:text-zinc-400 text-sm mt-1">Import Excel, CSV, or PDF files to automatically update the dashboard metrics.</p>
       </div>
 
-      <div className="glass rounded-3xl p-8 border border-border flex flex-col gap-8">
+      <div className="glass rounded-2xl p-8 border border-border dark:border-zinc-800/50 flex flex-col gap-8">
         
         {/* Mode Selection */}
-        <div className="flex p-1 bg-zinc-900/50 rounded-xl w-fit border border-zinc-800 mb-2">
+        <div className="flex p-1 bg-[#F8FAFC] dark:bg-zinc-900/50 rounded-xl w-fit border border-border dark:border-zinc-800">
           <button
             onClick={() => setUploadMode('daily')}
             className={clsx(
-              "px-6 py-2 rounded-lg text-sm font-medium transition-all",
-              uploadMode === 'daily' ? "bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+              "px-6 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer",
+              uploadMode === 'daily' ? "btn-primary-gradient bg-blue-600 text-white shadow-lg" : "text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] hover:bg-[#F0FDFA] dark:hover:text-zinc-200 dark:hover:bg-transparent"
             )}
           >
             تقرير شفتات (Daily Report)
@@ -247,8 +247,8 @@ export default function UploadPage() {
           <button
             onClick={() => setUploadMode('yearly')}
             className={clsx(
-              "px-6 py-2 rounded-lg text-sm font-medium transition-all",
-              uploadMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+              "px-6 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer",
+              uploadMode === 'yearly' ? "btn-primary-gradient bg-blue-600 text-white shadow-lg" : "text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] hover:bg-[#F0FDFA] dark:hover:text-zinc-200 dark:hover:bg-transparent"
             )}
           >
             تقرير تراكمي/سنوي (Yearly Report)
@@ -259,7 +259,7 @@ export default function UploadPage() {
           <>
             {/* Date Selection */}
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-4 block">Select Date</label>
+              <label className="text-sm font-semibold text-[#173B63] dark:text-zinc-300 mb-3 block">Select Date</label>
               <input 
                 type="date" 
                 value={date}
@@ -277,7 +277,7 @@ export default function UploadPage() {
                   }
                 }}
                 className={clsx(
-                  "w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:opacity-100",
+                  "w-full bg-[#F8FAFC] dark:bg-zinc-900/50 border border-border dark:border-zinc-800 text-[#173B63] dark:text-zinc-200 rounded-xl p-4 focus:outline-none focus:border-[#14B8A6] dark:focus:border-blue-500/50 transition-colors",
                   !allowDateTyping && "cursor-pointer"
                 )}
               />
@@ -285,29 +285,29 @@ export default function UploadPage() {
 
             {/* Shift Type Selection */}
             <div>
-              <label className="text-sm font-medium text-zinc-300 mb-4 block">Working Hours Type</label>
+              <label className="text-sm font-semibold text-[#173B63] dark:text-zinc-300 mb-3 block">Working Hours Type</label>
               <div className="grid grid-cols-2 gap-4 mb-4">
                  <label 
                     className={clsx(
                       "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
                       shiftType === 'shift' 
-                        ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                        : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                        ? "bg-[#CCFBF1] dark:bg-blue-600/10 border-[#14B8A6] dark:border-blue-500 text-[#0F766E] dark:text-blue-400 font-medium" 
+                        : "bg-[#F8FAFC] dark:bg-zinc-900/50 border-border dark:border-zinc-800 text-[#475569] dark:text-zinc-400 hover:bg-[#F0FDFA] hover:border-[#14B8A6]/50 dark:hover:bg-zinc-800"
                     )}
                     onClick={() => setShiftType('shift')}
                   >
-                    <span className="font-medium">شفتات (Shifts)</span>
+                    <span>شفتات (Shifts)</span>
                   </label>
                   <label 
                     className={clsx(
                       "flex items-center justify-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
                       shiftType === 'official' 
-                        ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                        : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                        ? "bg-[#CCFBF1] dark:bg-blue-600/10 border-[#14B8A6] dark:border-blue-500 text-[#0F766E] dark:text-blue-400 font-medium" 
+                        : "bg-[#F8FAFC] dark:bg-zinc-900/50 border-border dark:border-zinc-800 text-[#475569] dark:text-zinc-400 hover:bg-[#F0FDFA] hover:border-[#14B8A6]/50 dark:hover:bg-zinc-800"
                     )}
                     onClick={() => setShiftType('official')}
                   >
-                    <span className="font-medium">دوام رسمي (Official)</span>
+                    <span>دوام رسمي (Official)</span>
                   </label>
               </div>
 
@@ -324,18 +324,18 @@ export default function UploadPage() {
                       className={clsx(
                         "flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all",
                         shift === s.id 
-                          ? "bg-blue-500/10 border-blue-500/50 text-blue-400" 
-                          : "bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          ? "bg-[#CCFBF1] dark:bg-blue-600/10 border-[#14B8A6] dark:border-blue-500 text-[#0F766E] dark:text-blue-400 font-medium" 
+                          : "bg-[#F8FAFC] dark:bg-zinc-900/50 border-border dark:border-zinc-800 text-[#475569] dark:text-zinc-400 hover:bg-[#F0FDFA] hover:border-[#14B8A6]/50 dark:hover:bg-zinc-800"
                       )}
                       onClick={() => setShift(s.id)}
                     >
                       <div className={clsx(
-                        "w-4 h-4 rounded-full border flex items-center justify-center transition-colors",
-                        shift === s.id ? "border-blue-400" : "border-zinc-600"
+                        "w-4 h-4 rounded-full border flex items-center justify-center",
+                        shift === s.id ? "border-[#0F766E] dark:border-blue-400" : "border-[#94A3B8] dark:border-zinc-600"
                       )}>
-                        {shift === s.id && <div className="w-2 h-2 rounded-full bg-blue-400" />}
+                        {shift === s.id && <div className="w-2 h-2 rounded-full bg-[#0F766E] dark:bg-blue-400" />}
                       </div>
-                      <span className="font-medium text-sm">{s.label}</span>
+                      <span className="text-sm">{s.label}</span>
                     </label>
                   ))}
                 </div>
@@ -347,20 +347,20 @@ export default function UploadPage() {
         {/* Uploader Name & Target */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-4 block">Uploader Name (اسم رافع التقرير)</label>
-            <div className="w-full bg-zinc-900/80 border border-zinc-800 text-zinc-400 rounded-xl p-4 cursor-not-allowed flex items-center gap-3">
-               <User className="w-5 h-5 text-blue-400" />
-               {uploaderName ? <span className="text-zinc-200 font-medium">{uploaderName}</span> : <span className="opacity-50">جاري جلب الاسم...</span>}
+            <label className="text-sm font-semibold text-[#173B63] dark:text-zinc-300 mb-3 block">Uploader Name (اسم رافع التقرير)</label>
+            <div className="w-full bg-[#F8FAFC] dark:bg-zinc-900/30 border border-border dark:border-zinc-800/80 text-[#475569] dark:text-zinc-400 rounded-xl p-4 cursor-not-allowed flex items-center gap-3">
+               <User className="w-5 h-5 text-[#0F766E] dark:text-zinc-500" />
+               {uploaderName ? <span className="text-[#173B63] dark:text-zinc-300 font-medium">{uploaderName}</span> : <span className="opacity-50">جاري جلب الاسم...</span>}
             </div>
           </div>
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-4 block">Daily Target (الهدف اليومي)</label>
+            <label className="text-sm font-semibold text-[#173B63] dark:text-zinc-300 mb-3 block">Daily Target (الهدف اليومي)</label>
             <input 
               type="number" 
               placeholder="e.g. 640"
               value={dailyTarget}
               onChange={(e) => setDailyTarget(e.target.value)}
-              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all"
+              className="w-full bg-[#F8FAFC] dark:bg-zinc-900/50 border border-border dark:border-zinc-800 text-[#173B63] dark:text-zinc-200 rounded-xl p-4 focus:outline-none focus:border-[#14B8A6] dark:focus:border-blue-500/50 transition-colors"
             />
           </div>
         </div>
@@ -368,12 +368,12 @@ export default function UploadPage() {
         {/* Note / Remark */}
         {uploadMode === 'daily' && (
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-4 block">Note / Remark (ملاحظة)</label>
+            <label className="text-sm font-semibold text-[#173B63] dark:text-zinc-300 mb-3 block">Note / Remark (ملاحظة)</label>
             <textarea 
               placeholder="Enter any notes or remarks for this day..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full bg-zinc-900/50 border border-zinc-800 text-zinc-300 rounded-xl p-4 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all min-h-[100px] resize-y"
+              className="w-full bg-[#F8FAFC] dark:bg-zinc-900/50 border border-border dark:border-zinc-800 text-[#173B63] dark:text-zinc-200 rounded-xl p-4 focus:outline-none focus:border-[#14B8A6] dark:focus:border-blue-500/50 transition-colors min-h-[100px] resize-y"
             />
           </div>
         )}
@@ -386,7 +386,7 @@ export default function UploadPage() {
           onDrop={handleDrop}
           className={clsx(
             "relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-2xl transition-colors text-center",
-            dragActive ? "border-blue-500 bg-blue-500/5" : "border-zinc-700 bg-zinc-900/20",
+            dragActive ? "border-[#14B8A6] dark:border-blue-500 bg-[#F0FDFA] dark:bg-blue-500/5" : "border-[#CBD5E1] dark:border-zinc-700 bg-[#F8FAFC] dark:bg-zinc-900/30 hover:bg-[#F0FDFA]/60 dark:hover:bg-zinc-900/60 hover:border-[#14B8A6] dark:hover:border-zinc-600",
             status === 'success' && "border-emerald-500/50 bg-emerald-500/5",
             status === 'error' && "border-danger/50 bg-danger/5"
           )}
@@ -399,7 +399,7 @@ export default function UploadPage() {
           />
           
           {status === 'success' ? (
-            <div className="flex flex-col items-center text-emerald-400 animate-in zoom-in">
+            <div className="flex flex-col items-center text-emerald-600 dark:text-emerald-400 animate-in zoom-in">
               <CheckCircle className="w-16 h-16 mb-4" />
               <h3 className="text-xl font-bold mb-1">Upload Complete</h3>
               <p className="text-sm opacity-80">Data has been successfully imported to the database.</p>
@@ -411,19 +411,19 @@ export default function UploadPage() {
               <p className="text-sm opacity-80">There was an error parsing the file. Please try again.</p>
             </div>
           ) : file ? (
-            <div className="flex flex-col items-center text-blue-400">
+            <div className="flex flex-col items-center text-[#0F766E] dark:text-blue-400">
               <FileSpreadsheet className="w-16 h-16 mb-4" />
               <h3 className="text-xl font-bold mb-1">{file.name}</h3>
               <p className="text-sm opacity-80">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
             </div>
           ) : (
-            <div className="flex flex-col items-center text-zinc-400">
-              <div className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+            <div className="flex flex-col items-center text-[#475569] dark:text-zinc-400">
+              <div className="w-20 h-20 bg-[#CCFBF1]/60 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6 text-[#0F766E] dark:text-zinc-300">
                 <UploadCloud className="w-10 h-10" />
               </div>
-              <h3 className="text-xl font-bold text-zinc-200 mb-2">Drag & Drop your file here</h3>
+              <h3 className="text-xl font-bold text-[#173B63] dark:text-zinc-200 mb-2">Drag & Drop your file here</h3>
               <p className="text-sm max-w-sm mb-6">Supports Excel (.xlsx), CSV, and PDF formats. The system will automatically parse and save the data.</p>
-              <button className="px-6 py-2.5 rounded-full bg-zinc-800 text-white text-sm font-medium hover:bg-zinc-700 transition-colors pointer-events-none">
+              <button className="px-6 py-2.5 rounded-full bg-card dark:bg-zinc-800 border border-border dark:border-transparent text-[#0F766E] dark:text-white text-sm font-medium shadow-2xs pointer-events-none">
                 Browse Files
               </button>
             </div>
@@ -434,7 +434,7 @@ export default function UploadPage() {
         <button 
           onClick={handleUpload}
           disabled={!file || status === 'uploading' || status === 'success'}
-          className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold text-lg hover:from-blue-500 hover:to-blue-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(59,130,246,0.2)]"
+          className="w-full py-4 rounded-xl btn-primary-gradient bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-lg hover:from-blue-500 hover:to-cyan-500 transition-all shadow-lg shadow-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {status === 'uploading' ? 'Processing...' : 'Upload & Process Data'}
         </button>
@@ -443,46 +443,46 @@ export default function UploadPage() {
 
       {/* History Section */}
       <div className="mt-8">
-        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-          <Download className="w-5 h-5 text-blue-400" />
+        <h2 className="text-xl font-bold text-[#173B63] dark:text-white mb-6 flex items-center gap-2">
+          <Download className="w-5 h-5 text-[#0F766E] dark:text-blue-400" />
           سجل الملفات المرفوعة (Downloads)
         </h2>
         
         <div className="flex flex-col gap-4">
           {history.length === 0 ? (
-            <div className="text-zinc-500 text-center py-8 glass rounded-2xl border border-border">
+            <div className="text-[#64748B] dark:text-zinc-500 text-center py-8 glass rounded-2xl border border-border dark:border-zinc-800/50">
               No files uploaded yet.
             </div>
           ) : (
             history.map((item) => (
               <div 
                 key={item.id}
-                className="glass rounded-xl p-5 border border-border flex items-center justify-between hover:bg-white/5 transition-colors group"
+                className="glass rounded-xl p-5 border border-border dark:border-zinc-800/50 flex items-center justify-between hover:bg-[#F0FDFA]/60 dark:hover:bg-zinc-800/40 transition-colors group"
               >
                 <div 
                   className="flex items-center gap-4 cursor-pointer flex-1"
                   onClick={() => setSelectedHistory(item)}
                 >
-                  <div className="w-12 h-12 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <div className="w-12 h-12 rounded-xl bg-[#CCFBF1]/70 dark:bg-blue-500/10 text-[#0F766E] dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileSpreadsheet className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-white mb-1">{item.filename}</h4>
-                    <div className="flex items-center gap-4 text-sm text-zinc-400">
-                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-white" /> {item.date}</span>
+                    <h4 className="font-semibold text-[#173B63] dark:text-white mb-1">{item.filename}</h4>
+                    <div className="flex items-center gap-4 text-sm text-[#475569] dark:text-zinc-400">
+                      <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {item.date}</span>
                       <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {new Date(item.timestamp).toLocaleTimeString()}</span>
-                      <span className="px-2 py-0.5 rounded-md bg-zinc-800 text-xs text-zinc-300 capitalize">{item.shift}</span>
+                      <span className="px-2 py-0.5 rounded bg-[#F0FDFA] dark:bg-zinc-800 border border-[#CCFBF1] dark:border-transparent text-xs text-[#0F766E] dark:text-zinc-300 capitalize">{item.shift}</span>
                     </div>
                     {item.uploaderName && item.uploaderName !== 'Unknown' && (
-                      <div className="text-xs text-zinc-500 mt-1">Uploaded by: <span className="text-zinc-300">{item.uploaderName}</span></div>
+                      <div className="text-xs text-[#64748B] dark:text-zinc-500 mt-1">Uploaded by: <span className="text-[#173B63] dark:text-zinc-300">{item.uploaderName}</span></div>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <div 
                     onClick={() => setSelectedHistory(item)}
-                    className="text-sm font-medium text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer px-4 py-2 hover:bg-blue-500/10 rounded-lg"
+                    className="text-sm font-medium text-[#0F766E] dark:text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer px-3 py-1 hover:bg-[#CCFBF1]/50 dark:hover:bg-blue-500/10 rounded-lg"
                   >
                     View Data
                   </div>
@@ -491,7 +491,7 @@ export default function UploadPage() {
                       e.stopPropagation();
                       setDeletingId(item.id);
                     }}
-                    className="p-2 text-zinc-500 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors"
+                    className="p-2 text-[#64748B] dark:text-zinc-500 hover:text-danger hover:bg-danger/10 rounded-lg transition-colors cursor-pointer"
                     title="Delete Report"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -506,12 +506,12 @@ export default function UploadPage() {
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center text-center">
+          <div className="bg-card dark:bg-zinc-900 border border-border dark:border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl flex flex-col items-center text-center">
             <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">تم رفع التقرير بنجاح!</h3>
-            <p className="text-zinc-400 mb-6 text-sm">
+            <h3 className="text-xl font-bold text-[#173B63] dark:text-white mb-2">تم رفع التقرير بنجاح!</h3>
+            <p className="text-[#475569] dark:text-zinc-400 mb-6 text-sm">
               التقرير جاهز الآن في قاعدة البيانات.
             </p>
             <div className="flex flex-col gap-3 w-full">
@@ -521,13 +521,13 @@ export default function UploadPage() {
                   setFile(null);
                   setStatus('idle');
                 }}
-                className="w-full py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors shadow-lg"
+                className="w-full py-2.5 rounded-xl btn-primary-gradient bg-blue-600 text-white font-medium hover:bg-blue-500 transition-colors cursor-pointer"
               >
                 رفع تقرير آخر
               </button>
               <button
                 onClick={() => setShowSuccessModal(false)}
-                className="w-full py-2.5 rounded-lg border border-zinc-700 text-white font-medium hover:bg-zinc-800 transition-colors"
+                className="w-full py-2.5 rounded-xl border border-border dark:border-zinc-700 text-[#475569] dark:text-zinc-300 font-medium hover:bg-[#F8FAFC] dark:hover:bg-zinc-800 transition-colors cursor-pointer"
               >
                 إلغاء / إغلاق
               </button>
@@ -538,24 +538,24 @@ export default function UploadPage() {
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-            <h3 className="text-xl font-bold text-white mb-2">Delete Report?</h3>
-            <p className="text-zinc-400 mb-6 text-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-card border border-border rounded-2xl p-6 w-full max-w-sm shadow-2xl">
+            <h3 className="text-xl font-bold text-[#173B63] dark:text-white mb-2">Delete Report?</h3>
+            <p className="text-[#475569] dark:text-slate-400 mb-6 text-sm">
               Are you sure you want to delete this report? This will remove its data from the dashboard entirely. This action cannot be undone.
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeletingId(null)}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg border border-zinc-700 text-white font-medium hover:bg-zinc-800 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl border border-border text-[#475569] dark:text-slate-300 font-medium hover:bg-[#F8FAFC] dark:hover:bg-slate-800 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="flex-1 py-2.5 rounded-lg bg-danger text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl bg-danger text-white font-medium hover:bg-red-600 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}
               </button>
@@ -566,34 +566,34 @@ export default function UploadPage() {
 
       {/* Modal for viewing full data */}
       {selectedHistory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="glass rounded-3xl border border-border w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-border flex items-center justify-between bg-zinc-900/50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-card rounded-2xl border border-border w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+            <div className="p-6 border-b border-border flex items-center justify-between bg-[#F8FAFC] dark:bg-slate-900/50">
               <div>
-                <h3 className="text-xl font-bold text-white mb-1">{selectedHistory.filename}</h3>
-                <p className="text-sm text-zinc-400">Uploaded on {new Date(selectedHistory.timestamp).toLocaleString()} • Shift: {selectedHistory.shift}</p>
+                <h3 className="text-xl font-bold text-[#173B63] dark:text-white mb-1">{selectedHistory.filename}</h3>
+                <p className="text-sm text-[#475569] dark:text-slate-400">Uploaded on {new Date(selectedHistory.timestamp).toLocaleString()} • Shift: {selectedHistory.shift}</p>
               </div>
               <button 
                 onClick={() => setSelectedHistory(null)}
-                className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                className="w-10 h-10 rounded-full bg-card border border-border hover:bg-[#F0FDFA] flex items-center justify-center text-[#475569] hover:text-[#0F766E] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-6 overflow-auto bg-zinc-950/50">
+            <div className="p-6 overflow-auto bg-background">
               {/* Summary */}
               <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
                 {Object.entries(selectedHistory.summary).map(([key, val]) => (
                   <div key={key} className="glass p-4 rounded-xl border border-border text-center">
-                    <div className="text-xs text-zinc-400 uppercase tracking-wider mb-1">{key}</div>
-                    <div className="text-xl font-bold text-white">{val as number}</div>
+                    <div className="text-xs text-[#475569] dark:text-slate-400 uppercase tracking-wider mb-1 font-medium">{key}</div>
+                    <div className="text-xl font-bold text-[#173B63] dark:text-white">{val as number}</div>
                   </div>
                 ))}
               </div>
 
               {/* Full Data Table */}
-              <h4 className="font-semibold text-white mb-4">Raw Data Rows</h4>
+              <h4 className="font-semibold text-[#173B63] dark:text-white mb-4">Raw Data Rows</h4>
               <FormattedDataTable rows={selectedHistory.rows} />
             </div>
           </div>
@@ -616,7 +616,6 @@ const FormattedDataTable = ({ rows }: { rows: any[] }) => {
     // Station
     let stationName = getVal(['STATION', 'NAME', 'OPERATION', 'المحطة', 'DESIGNATION']);
     if (!stationName) {
-      // Find the first string that looks like a name
       stationName = Object.values(row).find(v => typeof v === 'string' && v.match(/[a-zA-Z]/) && !String(v).includes('BNR-')) || 'Unknown Station';
     }
     
@@ -628,7 +627,6 @@ const FormattedDataTable = ({ rows }: { rows: any[] }) => {
     // Numbers
     let passed = parseInt(getVal(['OK', 'PASS', 'GOOD', 'ناجح']) as string);
     let failed = parseInt(getVal(['KO', 'FAIL', 'DEFECT', 'رسب']) as string);
-    // Find input safely without matching 'OK' or 'KO'
     let inputKey = keys.find(k => {
       const up = k.toUpperCase();
       return (up.includes('BOARD') || up.includes('INPUT') || up.includes('ENTRANT') || up.includes('دخل')) && !up.includes('OK') && !up.includes('KO');
@@ -654,23 +652,22 @@ const FormattedDataTable = ({ rows }: { rows: any[] }) => {
   }).filter(r => r.input > 0 || r.passed > 0 || r.failed > 0 || r.tests > 0);
 
   if (formattedRows.length === 0) {
-    // Fallback to raw table if we couldn't parse anything meaningful
     return (
-      <div className="rounded-xl border border-border overflow-hidden">
+      <div className="rounded-xl border border-border overflow-hidden bg-card">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs uppercase bg-zinc-900/80 text-zinc-400 border-b border-border">
+            <thead className="text-xs uppercase bg-[#F8FAFC] dark:bg-slate-900/80 text-[#475569] dark:text-slate-400 border-b border-border">
               <tr>
                 {Object.keys(rows[0]).map(key => (
-                  <th key={key} className="px-6 py-4 font-medium whitespace-nowrap">{key}</th>
+                  <th key={key} className="px-6 py-4 font-semibold whitespace-nowrap">{key}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border">
               {rows.map((row: any, i: number) => (
-                <tr key={i} className="bg-transparent hover:bg-white/5 transition-colors">
+                <tr key={i} className="bg-transparent hover:bg-[#F0FDFA] dark:hover:bg-white/5 transition-colors">
                   {Object.values(row).map((val: any, j: number) => (
-                    <td key={j} className="px-6 py-3 text-zinc-300">{String(val)}</td>
+                    <td key={j} className="px-6 py-3 text-[#475569] dark:text-slate-300">{String(val)}</td>
                   ))}
                 </tr>
               ))}
@@ -682,16 +679,16 @@ const FormattedDataTable = ({ rows }: { rows: any[] }) => {
   }
 
   return (
-    <div className="w-full bg-white rounded-xl overflow-hidden text-zinc-800 shadow-sm border border-slate-200">
-      <div className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+    <div className="w-full bg-card rounded-xl overflow-hidden text-[#475569] dark:text-slate-300 shadow-xs border border-border">
+      <div className="bg-card border-b border-border p-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-           <span className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">{formattedRows.length} محطات</span>
+           <span className="bg-[#CCFBF1] text-[#0F766E] dark:bg-[#14B8A6]/15 dark:text-[#2DD4BF] px-3 py-1 rounded-full text-xs font-bold">{formattedRows.length} محطات</span>
         </div>
-        <h3 className="font-bold text-slate-700 text-lg">تفاصيل المحطات (التدفق والإنتاجية)</h3>
+        <h3 className="font-bold text-[#173B63] dark:text-white text-lg">تفاصيل المحطات (التدفق والإنتاجية)</h3>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-center" dir="rtl">
-          <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold text-[13px]">
+          <thead className="bg-[#F8FAFC] dark:bg-slate-900 border-b border-border text-[#475569] dark:text-slate-400 font-bold text-[13px]">
             <tr>
               <th className="px-4 py-4 text-right whitespace-nowrap w-[200px]">المحطة</th>
               <th className="px-4 py-4 whitespace-nowrap">مرات الفحص</th>
@@ -701,23 +698,23 @@ const FormattedDataTable = ({ rows }: { rows: any[] }) => {
               <th className="px-4 py-4 whitespace-nowrap">نسبة النجاح من أول مرة</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-border">
             {formattedRows.map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50/50 transition-colors bg-white">
+              <tr key={i} className="hover:bg-[#F0FDFA] dark:hover:bg-slate-800/40 transition-colors bg-card">
                 <td className="px-4 py-3 text-right">
-                  <div className="font-bold text-slate-800 text-[14px]">{row.stationName}</div>
-                  <div className="text-[11px] text-slate-400 font-mono mt-0.5">{row.code}</div>
+                  <div className="font-bold text-[#173B63] dark:text-slate-100 text-[14px]">{row.stationName}</div>
+                  <div className="text-[11px] text-[#64748B] font-mono mt-0.5">{row.code}</div>
                 </td>
-                <td className="px-4 py-3 font-medium text-slate-500">{row.tests}</td>
-                <td className="px-4 py-3 font-bold text-slate-800">{row.input}</td>
-                <td className="px-4 py-3 font-bold text-emerald-600">{row.passed}</td>
+                <td className="px-4 py-3 font-medium text-[#475569] dark:text-slate-400">{row.tests}</td>
+                <td className="px-4 py-3 font-bold text-[#173B63] dark:text-slate-100">{row.input}</td>
+                <td className="px-4 py-3 font-bold text-emerald-600 dark:text-emerald-400">{row.passed}</td>
                 <td className="px-4 py-3 font-bold text-red-500">{row.failed}</td>
                 <td className="px-4 py-3">
                   <span className={clsx(
                     "px-3 py-1.5 rounded-full text-[12px] font-bold border inline-block min-w-[60px]",
-                    parseFloat(row.fpy) >= 95 ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
-                    parseFloat(row.fpy) >= 80 ? "bg-amber-50 text-amber-600 border-amber-200" :
-                    "bg-red-50 text-red-500 border-red-200"
+                    parseFloat(row.fpy) >= 95 ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20" :
+                    parseFloat(row.fpy) >= 80 ? "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20" :
+                    "bg-red-50 text-red-700 border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20"
                   )}>
                     {row.fpy}%
                   </span>

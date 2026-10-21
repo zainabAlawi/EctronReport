@@ -272,8 +272,8 @@ export default async function DashboardPage(props: {
             </div>
           )}
           {mode === 'daily' && isExcellent && (
-            <div className="px-4 py-2 rounded-lg bg-[#00a99d]/10 border border-[#00a99d]/20 text-[#00a99d] text-sm font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#00a99d] animate-pulse"></span>
+            <div className="px-4 py-2 rounded-xl bg-[#CCFBF1] dark:bg-[#14B8A6]/15 border border-[#14B8A6]/30 text-[#0F766E] dark:text-[#2DD4BF] text-sm font-semibold flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#14B8A6] animate-pulse"></span>
               Excellent: Target Reached!
             </div>
           )}

@@ -44,15 +44,36 @@ CREATE TABLE IF NOT EXISTS public.petty_cash_reimbursements (
 );
 
 -- Insert Default Data
-INSERT INTO public.projects (name) VALUES ('General / Factory Operations') ON CONFLICT DO NOTHING;
+INSERT INTO public.projects (name) VALUES 
+('Head Office'),
+('Ectron'),
+('Sagemcom'),
+('Tadoom'),
+('ECT Project'),
+('Tadoom & Ectron 50%'),
+('Ectron 80%, AAMU 20%'),
+('Ectron 50%, AAMU 50%'),
+('Ectron 90%, Tadoom 10%'),
+('Ectron 85%, NEC 5%, AAMU 10%'),
+('General / Factory Operations')
+ON CONFLICT (name) DO NOTHING;
 
 INSERT INTO public.petty_cash_categories (name) VALUES 
 ('Office Supplies'), ('Stationery'), ('Transportation'), ('Fuel'), 
-('Courier'), ('Refreshments'), ('Hospitality'), ('Maintenance'), 
-('Cleaning'), ('Postage'), ('Small Tools'), ('Employee Expenses'), 
+('Delivery Services'), ('Postage'), ('Refreshments'), ('Hospitality'), 
+('Maintenance'), ('Cleaning'), ('Small Tools'), ('Employee Expenses'), 
 ('IT Supplies'), ('Electrical Supplies'), ('Safety Items'), 
-('Warehouse Equipment'), ('Business Gifts'), ('Other')
+('Warehouse Equipment'), ('Business Gifts'), ('Employee Welfare'), 
+('Kitchen Tools'), ('External Labor'), ('Other')
 ON CONFLICT (name) DO NOTHING;
+
+-- 5. Recurring Descriptions
+CREATE TABLE IF NOT EXISTS public.petty_cash_recurring_descriptions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  description text NOT NULL UNIQUE,
+  active boolean DEFAULT true,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 
 -- Policies
 ALTER TABLE public.projects ENABLE ROW LEVEL SECURITY;
@@ -66,3 +87,6 @@ CREATE POLICY "Allow all operations for petty_cash_expenses" ON public.petty_cas
 
 ALTER TABLE public.petty_cash_reimbursements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all operations for petty_cash_reimbursements" ON public.petty_cash_reimbursements FOR ALL USING (true);
+
+ALTER TABLE public.petty_cash_recurring_descriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all operations for petty_cash_recurring_descriptions" ON public.petty_cash_recurring_descriptions FOR ALL USING (true);

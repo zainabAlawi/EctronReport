@@ -1,6 +1,7 @@
 import LoginForm from './LoginForm';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase-server';
+import { ThemeToggleSwitch } from '@/components/layout/ThemeProvider';
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -11,15 +12,23 @@ export default async function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900/20 via-black to-black"></div>
+    <div className="min-h-screen flex items-center justify-center bg-background relative transition-colors duration-300">
+      <div className="absolute top-6 right-6 z-20">
+        <ThemeToggleSwitch />
+      </div>
+      <div className="hidden dark:block absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#00a99d]/15 via-background to-background pointer-events-none"></div>
       
-      <div className="relative z-10 w-full max-w-md p-8 glass rounded-2xl border border-zinc-800 shadow-2xl">
+      <div className="relative z-10 w-full max-w-md p-8 glass rounded-2xl border border-[#E2E8F0] dark:border-zinc-800 shadow-lg dark:shadow-2xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
-            ECTRON Smart
-          </h1>
-          <p className="text-zinc-400 mt-2">Sign in to your account</p>
+          <div className="inline-flex items-baseline select-none tracking-tight mb-1">
+            <span className="text-4xl font-extrabold text-[#173B63] dark:text-blue-400">ectr</span>
+            <span className="relative inline-flex items-center justify-center mx-0.5">
+              <span className="w-5 h-5 rounded-full bg-[#14B8A6] dark:bg-[#00a99d] inline-block" />
+              <span className="w-2 h-2 rounded-full bg-[#173B63] dark:bg-blue-400 absolute -top-3 -right-0.5" />
+            </span>
+            <span className="text-4xl font-extrabold text-[#173B63] dark:text-blue-400">n</span>
+          </div>
+          <p className="text-[#475569] dark:text-zinc-400 mt-2">Sign in to your account</p>
         </div>
         
         <LoginForm />

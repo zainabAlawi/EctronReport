@@ -3,8 +3,12 @@
 import { useState, useEffect } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 import ReactECharts from 'echarts-for-react';
+import { useTheme } from '@/components/layout/ThemeProvider';
 
 export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxisData?: string[] }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const options = {
     toolbox: {
       feature: {
@@ -12,8 +16,8 @@ export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxi
           title: 'Export Image',
           pixelRatio: 2,
           name: 'chart_export',
-          backgroundColor: '#18181b',
-          iconStyle: { borderColor: '#00a99d' }
+          backgroundColor: isLight ? '#ffffff' : '#18181b',
+          iconStyle: { borderColor: isLight ? '#0F766E' : '#00a99d' }
         }
       }
     },
@@ -21,15 +25,15 @@ export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxi
     xAxis: {
       type: 'category',
       data: xAxisData || ['Shift 1', 'Shift 2', 'Shift 3', 'Official'],
-      axisLabel: { color: '#00a99d' },
+      axisLabel: { color: isLight ? '#475569' : '#00a99d', fontWeight: 600 },
     },
     yAxis: {
       type: 'value',
       axisLabel: { 
-        color: '#00a99d',
+        color: isLight ? '#475569' : '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       },
-      splitLine: { lineStyle: { color: '#27272a' } },
+      splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } },
     },
     series: [
       {
@@ -38,18 +42,22 @@ export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxi
         label: { 
           show: true, 
           position: 'top', 
-          color: '#fff',
+          color: isLight ? '#173B63' : '#fff',
+          fontWeight: 'bold',
           formatter: function(params: any) { return Math.round(params.value) + ''; }
         },
         smooth: true,
-        lineStyle: { width: 3, color: '#3b82f6' },
+        lineStyle: { width: 3, color: isLight ? '#0F766E' : '#00a99d' },
         areaStyle: {
           color: {
             type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-            colorStops: [{ offset: 0, color: 'rgba(59, 130, 246, 0.5)' }, { offset: 1, color: 'rgba(59, 130, 246, 0)' }]
+            colorStops: [
+              { offset: 0, color: isLight ? 'rgba(20, 184, 166, 0.28)' : 'rgba(0, 169, 157, 0.45)' },
+              { offset: 1, color: 'rgba(0, 169, 157, 0)' }
+            ]
           }
         },
-        itemStyle: { color: '#3b82f6' },
+        itemStyle: { color: isLight ? '#14B8A6' : '#00a99d' },
       }
     ]
   };
@@ -58,6 +66,9 @@ export function ShiftProductionChart({ data, xAxisData }: { data: number[], xAxi
 }
 
 export function TargetVsActualChart({ categories, targetData, actualData }: { categories: string[], targetData: number[], actualData: number[] }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   const options = {
     toolbox: {
       feature: {
@@ -65,25 +76,25 @@ export function TargetVsActualChart({ categories, targetData, actualData }: { ca
           title: 'Export Image',
           pixelRatio: 2,
           name: 'chart_export',
-          backgroundColor: '#18181b',
-          iconStyle: { borderColor: '#00a99d' }
+          backgroundColor: isLight ? '#ffffff' : '#18181b',
+          iconStyle: { borderColor: isLight ? '#0F766E' : '#00a99d' }
         }
       }
     },
     tooltip: { trigger: 'axis' },
-    legend: { textStyle: { color: '#00a99d' }, top: 0 },
+    legend: { textStyle: { color: isLight ? '#173B63' : '#00a99d', fontWeight: 600 }, top: 0 },
     xAxis: {
       type: 'category',
       data: categories || [],
-      axisLabel: { color: '#00a99d' },
+      axisLabel: { color: isLight ? '#475569' : '#00a99d', fontWeight: 500 },
     },
     yAxis: {
       type: 'value',
       axisLabel: { 
-        color: '#00a99d',
+        color: isLight ? '#475569' : '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       },
-      splitLine: { lineStyle: { color: '#27272a' } },
+      splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } },
     },
     series: [
       {
@@ -93,10 +104,10 @@ export function TargetVsActualChart({ categories, targetData, actualData }: { ca
         label: { 
           show: true, 
           position: 'top', 
-          color: '#fff',
+          color: isLight ? '#173B63' : '#fff',
           formatter: function(params: any) { return Math.round(params.value) + ''; }
         },
-        itemStyle: { color: '#27272a', borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: isLight ? '#173B63' : '#27272a', borderRadius: [4, 4, 0, 0] },
       },
       {
         name: 'Actual',
@@ -105,10 +116,11 @@ export function TargetVsActualChart({ categories, targetData, actualData }: { ca
         label: { 
           show: true, 
           position: 'top', 
-          color: '#fff',
+          color: isLight ? '#0F766E' : '#fff',
+          fontWeight: 'bold',
           formatter: function(params: any) { return Math.round(params.value) + ''; }
         },
-        itemStyle: { color: '#10b981', borderRadius: [4, 4, 0, 0] },
+        itemStyle: { color: isLight ? '#14B8A6' : '#00a99d', borderRadius: [4, 4, 0, 0] },
       }
     ]
   };
@@ -117,6 +129,8 @@ export function TargetVsActualChart({ categories, targetData, actualData }: { ca
 }
 
 export function AchievementGauge({ achieved, target }: { achieved: number, target: number }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const [manualMax, setManualMax] = useState<number | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   
@@ -146,8 +160,8 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
           title: 'Export Image',
           pixelRatio: 2,
           name: 'chart_export',
-          backgroundColor: '#18181b',
-          iconStyle: { borderColor: '#00a99d' }
+          backgroundColor: isLight ? '#ffffff' : '#18181b',
+          iconStyle: { borderColor: isLight ? '#0F766E' : '#00a99d' }
         }
       }
     },
@@ -164,7 +178,7 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
         axisLine: {
           lineStyle: {
             width: 15,
-            color: [[0.8, '#ef4444'], [0.9, '#f59e0b'], [1, '#10b981']],
+            color: [[0.8, '#ef4444'], [0.9, isLight ? '#173B63' : '#1b497f'], [1, isLight ? '#14B8A6' : '#00a99d']],
           }
         },
         pointer: {
@@ -177,13 +191,14 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
         axisTick: { length: 12, lineStyle: { color: 'auto', width: 2 } },
         splitLine: { length: 20, lineStyle: { color: 'auto', width: 5 } },
         axisLabel: { 
-          color: '#00a99d', 
+          color: isLight ? '#475569' : '#00a99d', 
           distance: -60, 
-          fontSize: 14,
+          fontSize: 13,
+          fontWeight: 600,
           formatter: function (value: number) { return Math.round(value) + ''; }
         },
-        title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: '#00a99d' } },
-        detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}', color: 'auto' },
+        title: { offsetCenter: [0, '-10%'], textStyle: { fontSize: 14, color: isLight ? '#0F766E' : '#00a99d', fontWeight: 'bold' } },
+        detail: { fontSize: 30, offsetCenter: [0, '20%'], valueAnimation: true, formatter: '{value}', color: isLight ? '#173B63' : 'auto' },
         data: [{ value: achieved, name: 'Achieved' }]
       }
     ]
@@ -198,16 +213,16 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
               type="number" 
               value={tempValue}
               onChange={(e) => setTempValue(e.target.value)}
-              className="w-20 bg-zinc-900 border border-zinc-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-blue-500"
+              className="w-20 bg-zinc-900 border border-zinc-700 text-white rounded px-2 py-1 text-sm focus:outline-none focus:border-[#00a99d]"
               autoFocus
             />
-            <button onClick={handleSave} className="p-1 text-emerald-400 hover:bg-emerald-400/10 rounded"><Check className="w-4 h-4" /></button>
+            <button onClick={handleSave} className="p-1 text-[#00a99d] hover:bg-[#00a99d]/10 rounded"><Check className="w-4 h-4" /></button>
             <button onClick={() => setIsEditing(false)} className="p-1 text-red-400 hover:bg-red-400/10 rounded"><X className="w-4 h-4" /></button>
           </div>
         ) : (
           <button 
             onClick={() => setIsEditing(true)}
-            className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+            className="p-2 text-zinc-400 hover:text-[#00a99d] hover:bg-[#00a99d]/10 rounded-lg transition-colors"
             title="تعديل الإنجاز"
           >
             <Edit2 className="w-4 h-4" />
@@ -220,6 +235,8 @@ export function AchievementGauge({ achieved, target }: { achieved: number, targe
 }
 
 export function MonthlyAggregationChart({ dbData, division, year }: { dbData: any[], division: string, year: string }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isWater = division === 'water';
   const data = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   
@@ -238,20 +255,20 @@ export function MonthlyAggregationChart({ dbData, division, year }: { dbData: an
           title: 'Export Image',
           pixelRatio: 2,
           name: 'chart_export',
-          backgroundColor: '#18181b',
-          iconStyle: { borderColor: '#00a99d' }
+          backgroundColor: isLight ? '#ffffff' : '#18181b',
+          iconStyle: { borderColor: isLight ? '#0F766E' : '#00a99d' }
         }
       }
     },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#00a99d' } },
+    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: isLight ? '#475569' : '#00a99d', fontWeight: 600 } },
     yAxis: { 
       type: 'value', 
       axisLabel: { 
-        color: '#00a99d',
+        color: isLight ? '#475569' : '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       }, 
-      splitLine: { lineStyle: { color: '#27272a' } } 
+      splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } } 
     },
     series: [{ 
       type: 'bar', 
@@ -259,10 +276,11 @@ export function MonthlyAggregationChart({ dbData, division, year }: { dbData: an
       label: { 
         show: true, 
         position: 'top', 
-        color: '#fff',
+        color: isLight ? '#173B63' : '#fff',
+        fontWeight: 'bold',
         formatter: function(params: any) { return Math.round(params.value) + ''; }
       }, 
-      itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] } 
+      itemStyle: { color: isLight ? '#0F766E' : '#3b82f6', borderRadius: [4, 4, 0, 0] } 
     }]
   };
 
@@ -270,6 +288,8 @@ export function MonthlyAggregationChart({ dbData, division, year }: { dbData: an
 }
 
 export function YearlyGrowthChart({ dbData, division }: { dbData: any[], division: string }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
 
@@ -295,20 +315,20 @@ export function YearlyGrowthChart({ dbData, division }: { dbData: any[], divisio
           title: 'Export Image',
           pixelRatio: 2,
           name: 'chart_export',
-          backgroundColor: '#18181b',
-          iconStyle: { borderColor: '#00a99d' }
+          backgroundColor: isLight ? '#ffffff' : '#18181b',
+          iconStyle: { borderColor: isLight ? '#0F766E' : '#00a99d' }
         }
       }
     },
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: '#00a99d' } },
+    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: isLight ? '#475569' : '#00a99d', fontWeight: 600 } },
     yAxis: { 
       type: 'value', 
       axisLabel: { 
-        color: '#00a99d',
+        color: isLight ? '#475569' : '#00a99d',
         formatter: function(value: number) { return Math.round(value) + ''; }
       }, 
-      splitLine: { lineStyle: { color: '#27272a' } } 
+      splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } } 
     },
     series: [{ 
       type: 'bar', 
@@ -316,10 +336,11 @@ export function YearlyGrowthChart({ dbData, division }: { dbData: any[], divisio
       label: { 
         show: true, 
         position: 'top', 
-        color: '#fff',
+        color: isLight ? '#173B63' : '#fff',
+        fontWeight: 'bold',
         formatter: function(params: any) { return Math.round(params.value) + ''; }
       }, 
-      itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } 
+      itemStyle: { color: isLight ? '#14B8A6' : '#00a99d', borderRadius: [4, 4, 0, 0] } 
     }]
   };
   return <ReactECharts option={options} style={{ height: '300px' }} />;

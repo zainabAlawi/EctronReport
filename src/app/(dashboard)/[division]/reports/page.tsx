@@ -9,6 +9,7 @@ import * as XLSX from 'xlsx';
 
 import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useTheme } from '@/components/layout/ThemeProvider';
 
 const TABS = ['Daily', 'Weekly', 'Monthly', 'Yearly'];
 
@@ -211,10 +212,10 @@ export default function ReportsPage() {
           <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-sm font-medium hover:bg-zinc-700 transition-colors border border-zinc-700">
             <Printer className="w-4 h-4" /> Print Report
           </button>
-          <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 text-white text-sm font-medium hover:bg-blue-600 transition-colors shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <button onClick={handlePrint} className="flex items-center gap-2 px-4 py-2 rounded-lg btn-primary-gradient bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 transition-colors shadow-lg shadow-blue-900/20">
             <Download className="w-4 h-4" /> Export PDF
           </button>
-          <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white text-sm font-medium hover:bg-emerald-600 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+          <button onClick={exportToExcel} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-900/20">
             <Download className="w-4 h-4" /> Export Excel
           </button>
         </div>
@@ -229,7 +230,7 @@ export default function ReportsPage() {
               className={clsx(
                 "px-6 py-2 rounded-lg text-sm font-medium transition-all",
                 activeTab === tab 
-                  ? "bg-zinc-800 text-white shadow-sm" 
+                  ? "btn-primary-gradient bg-blue-600 text-white shadow-lg" 
                   : "text-zinc-400 hover:text-zinc-200"
               )}
             >
@@ -361,7 +362,7 @@ function DailyReport({ division, totals, date, target, shiftData, failersData }:
       <h3 className="text-lg font-semibold text-white print:text-black mb-2">Daily Summary</h3>
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatBox label="Today's Target" value={target.toLocaleString()} />
-        <StatBox label="Production" value={achieved.toLocaleString()} color="text-[#00a99d]" />
+        <StatBox label="Production" value={achieved.toLocaleString()} color="text-[#0F766E] dark:text-[#00a99d]" />
         <StatBox label="Remaining" value={remaining.toLocaleString()} color="text-orange-500" />
         <StatBox label="Total Failers" value={totalFailers.toLocaleString()} color="text-red-500" />
         <StatBox label="Efficiency" value={`${eff}%`} />
@@ -424,6 +425,8 @@ function StepBox({ name, value, status }: { name: string, value: string, status:
 }
 
 function WeeklyReport({ dbData, division, year, month, target }: { dbData: any[], division: string, year: string, month: string, target: number }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
   
@@ -446,14 +449,14 @@ function WeeklyReport({ dbData, division, year, month, target }: { dbData: any[]
 
   const options = {
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['Week 1 (1-7)', 'Week 2 (8-14)', 'Week 3 (15-21)', 'Week 4 (22+)'], axisLabel: { color: '#a1a1aa' } },
-    yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
+    xAxis: { type: 'category', data: ['Week 1 (1-7)', 'Week 2 (8-14)', 'Week 3 (15-21)', 'Week 4 (22+)'], axisLabel: { color: isLight ? '#475569' : '#a1a1aa' } },
+    yAxis: { type: 'value', axisLabel: { color: isLight ? '#475569' : '#a1a1aa' }, splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } } },
     series: [
       {
         type: 'bar',
         data: data,
-        label: { show: true, position: 'top', color: '#fff' },
-        itemStyle: { color: '#3b82f6', borderRadius: [4, 4, 0, 0] }
+        label: { show: true, position: 'top', color: isLight ? '#173B63' : '#fff', fontWeight: 'bold' },
+        itemStyle: { color: isLight ? '#0F766E' : '#3b82f6', borderRadius: [4, 4, 0, 0] }
       }
     ]
   };
@@ -675,6 +678,8 @@ function WeeklyReport({ dbData, division, year, month, target }: { dbData: any[]
 }
 
 function MonthlyReport({ dbData, division, year, target }: { dbData: any[], division: string, year: string, target: number }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
   
@@ -690,9 +695,9 @@ function MonthlyReport({ dbData, division, year, target }: { dbData: any[], divi
   
   const options = {
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: '#a1a1aa' } },
-    yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
-    series: [{ type: 'line', data: data, label: { show: true, position: 'top', color: '#fff' }, itemStyle: { color: '#10b981' }, smooth: true, areaStyle: { opacity: 0.1 } }]
+    xAxis: { type: 'category', data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], axisLabel: { color: isLight ? '#475569' : '#a1a1aa' } },
+    yAxis: { type: 'value', axisLabel: { color: isLight ? '#475569' : '#a1a1aa' }, splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } } },
+    series: [{ type: 'line', data: data, label: { show: true, position: 'top', color: isLight ? '#173B63' : '#fff', fontWeight: 'bold' }, itemStyle: { color: isLight ? '#14B8A6' : '#00a99d' }, smooth: true, areaStyle: { opacity: 0.2 } }]
   };
 
   const getStatusColor = (percentage: number) => {
@@ -850,6 +855,8 @@ function MonthlyReport({ dbData, division, year, target }: { dbData: any[], divi
 }
 
 function YearlyReport({ dbData, division }: { dbData: any[], division: string }) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const isWater = division === 'water';
   const getDailyTotal = (d: any) => isWater ? (d.packaging || 0) : (d.multy_test || 0);
 
@@ -870,9 +877,9 @@ function YearlyReport({ dbData, division }: { dbData: any[], division: string })
 
   const options = {
     tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: '#a1a1aa' } },
-    yAxis: { type: 'value', axisLabel: { color: '#a1a1aa' }, splitLine: { lineStyle: { color: '#27272a' } } },
-    series: [{ type: 'bar', data: data, label: { show: true, position: 'top', color: '#fff' }, itemStyle: { color: '#8b5cf6', borderRadius: [4, 4, 0, 0] } }]
+    xAxis: { type: 'category', data: yearsLabels, axisLabel: { color: isLight ? '#475569' : '#a1a1aa' } },
+    yAxis: { type: 'value', axisLabel: { color: isLight ? '#475569' : '#a1a1aa' }, splitLine: { lineStyle: { color: isLight ? '#E2E8F0' : '#27272a' } } },
+    series: [{ type: 'bar', data: data, label: { show: true, position: 'top', color: isLight ? '#173B63' : '#fff', fontWeight: 'bold' }, itemStyle: { color: isLight ? '#14B8A6' : '#00a99d', borderRadius: [4, 4, 0, 0] } }]
   };
   return <div className="h-full"><h3 className="text-lg font-semibold text-white mb-4">Yearly Growth</h3><ReactECharts option={options} style={{ height: '300px' }} /></div>;
 }

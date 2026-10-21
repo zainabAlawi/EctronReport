@@ -1,0 +1,32 @@
+{
+  "batches": [
+    {
+      "id": "BATCH-202610-1241992",
+      "name": "October 1",
+      "month": 10,
+      "year": 2026,
+      "createdAt": "2026-10-21",
+      "status": "In Progress",
+      "invoiceIds": [
+        "9cd69e63-4dd4-4971-9a59-382316e860b0",
+        "bb0a3753-ed29-4d57-87a7-78b0f0006e3b",
+        "1c74b2ea-a6cb-4e16-baf3-3a19de233198"
+      ],
+      "pcvNo": "",
+      "advanceAmount": 1500
+    },
+    {
+      "id": "BATCH-202610-3843547",
+      "name": "October 2",
+      "month": 10,
+      "year": 2026,
+      "createdAt": "2026-10-21",
+      "status": "In Progress",
+      "invoiceIds": [
+        "659ccf33-43b6-4e05-91e0-a9be53b8ec47"
+      ],
+      "pcvNo": "",
+      "advanceAmount": 1500
+    }
+  ]
+}

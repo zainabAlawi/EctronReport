@@ -17,9 +17,6 @@ export default function LoginForm() {
     setIsLoading(true);
     setError(null);
     
-    // Convert username to email format if necessary, as Supabase Auth prefers emails.
-    // For this project, if the user signs in with 'ahmed01', we can map it to 'ahmed01@ectron.local' 
-    // when creating users, so they can login. Or we can just use email directly.
     const email = username.includes('@') ? username : `${username}@ectron.local`;
 
     const supabase = createClient();
@@ -53,7 +50,7 @@ export default function LoginForm() {
           type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-colors"
+          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/40 dark:focus:ring-blue-500/50 focus:border-[#14B8A6] dark:focus:border-blue-500/50 transition-colors"
           placeholder="1234"
           required
         />
@@ -67,7 +64,7 @@ export default function LoginForm() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-colors"
+          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#14B8A6]/40 dark:focus:ring-blue-500/50 focus:border-[#14B8A6] dark:focus:border-blue-500/50 transition-colors"
           placeholder="••••••••"
           required
         />
@@ -76,7 +73,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={isLoading}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+        className="w-full btn-primary-gradient dark:bg-none dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-medium py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
       >
         {isLoading ? (
           <>

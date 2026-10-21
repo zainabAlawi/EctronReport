@@ -1,0 +1,43 @@
+{
+  "allowedEmployeeIds": [
+    "715e9fae-9b70-4c72-b644-bf0555e8ba49",
+    "5e21389a-01d3-4603-99c7-36e4664e07ce",
+    "aa7ec15f-64cd-4117-8611-9b9f1195ebe2",
+    "e836d78d-b9d3-4a87-8128-c2d35ce2da86",
+    "640838e9-e2f5-4b3e-acde-3d5563cdf585"
+  ],
+  "recurringDescriptions": [
+    {
+      "id": "desc-1",
+      "text": "Office Stationery and Supplies"
+    },
+    {
+      "id": "desc-2",
+      "text": "Fuel for Factory & Site Vehicles"
+    },
+    {
+      "id": "desc-3",
+      "text": "Hospitality & Refreshments for Guests"
+    },
+    {
+      "id": "desc-4",
+      "text": "Facility Maintenance and Repair"
+    },
+    {
+      "id": "desc-5",
+      "text": "Cleaning & Pantry Supplies"
+    },
+    {
+      "id": "desc-6",
+      "text": "Courier & Document Delivery"
+    },
+    {
+      "id": "desc-7",
+      "text": "Small Tools and Consumables"
+    },
+    {
+      "id": "desc-8",
+      "text": "IT & Electrical Supplies"
+    }
+  ]
+}

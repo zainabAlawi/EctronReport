@@ -3,24 +3,11 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Calendar as CalendarIcon, Clock, Filter } from 'lucide-react';
 import clsx from 'clsx';
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function DashboardControls({ currentMode, currentDate, currentYear, division }: { currentMode: string, currentDate: string, currentYear: string, division: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  const handleModeChange = (mode: 'daily' | 'yearly') => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('mode', mode);
-    router.push(`/${division}/dashboard?${params.toString()}`);
-  };
-
-  const handleDateChange = (date: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('date', date);
-    router.push(`/${division}/dashboard?${params.toString()}`);
-  };
 
   const handleYearChange = (year: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -44,7 +31,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
           href={createUrl('daily')}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
-            currentMode === 'daily' ? "bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+            currentMode === 'daily' ? "btn-primary-gradient dark:bg-none dark:bg-blue-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           )}
         >
           <Clock className="w-4 h-4" />
@@ -54,7 +41,7 @@ export default function DashboardControls({ currentMode, currentDate, currentYea
           href={createUrl('yearly')}
           className={clsx(
             "px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all",
-            currentMode === 'yearly' ? "bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
+            currentMode === 'yearly' ? "btn-primary-gradient dark:bg-none dark:bg-emerald-600 text-white shadow-sm" : "text-zinc-400 hover:text-zinc-200"
           )}
         >
           <CalendarIcon className="w-4 h-4 text-white" />

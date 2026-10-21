@@ -1,7 +1,9 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase-server';
 import PettyCashSummaryCards from '@/components/petty-cash/PettyCashSummaryCards';
+import PettyCashBatchesSection from '@/components/petty-cash/PettyCashBatchesSection';
 import ExpenseTable from '@/components/petty-cash/ExpenseTable';
+import { getBatches, PettyCashBatch } from '@/app/(dashboard)/petty-cash/actions/batchesActions';
 
 export default async function PettyCashDashboard() {
   const supabase = await createClient();
@@ -18,13 +20,37 @@ export default async function PettyCashDashboard() {
   let categoriesResp: any = { data: [] };
   let profilesResp: any = { data: [] };
   let projectsResp: any = { data: [] };
+  let recurringResp: any[] = [];
+  let batchesData: PettyCashBatch[] = [];
 
   try {
+    try {
+      batchesData = await getBatches();
+    } catch (e) {}
+
+    try {
+      const { getRecurringDescriptions } = await import('@/app/(dashboard)/petty-cash/actions/resourcesActions');
+      recurringResp = await getRecurringDescriptions();
+    } catch (e) {}
+
     [categoriesResp, profilesResp, projectsResp] = await Promise.all([
       supabase.from('petty_cash_categories').select('id, name').eq('active', true).order('name'),
       supabase.from('profiles').select('id, full_name, username').eq('is_active', true).order('full_name'),
       supabase.from('projects').select('id, name').eq('active', true).order('name')
     ]);
+
+    // Filter profiles by allowed petty cash employee IDs
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      const settingsPath = path.join(process.cwd(), 'src', 'data', 'petty-cash-settings.json');
+      const content = await fs.readFile(settingsPath, 'utf-8');
+      const settings = JSON.parse(content);
+      if (settings.allowedEmployeeIds && settings.allowedEmployeeIds.length > 0 && profilesResp.data) {
+        const allowedSet = new Set(settings.allowedEmployeeIds);
+        profilesResp.data = profilesResp.data.filter((p: any) => allowedSet.has(p.id));
+      }
+    } catch (e) {}
 
     const { data: expenses, error } = await supabase
       .from('petty_cash_expenses')
@@ -42,14 +68,15 @@ export default async function PettyCashDashboard() {
         profiles (full_name, username),
         projects (name)
       `)
-      .gte('expense_date', startOfMonth)
-      .lte('expense_date', endOfMonth)
-      .order('expense_date', { ascending: true }); // Oldest to newest as requested
+      .order('expense_date', { ascending: true });
 
     if (!error && expenses) {
-      spent = expenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
-      expenseCount = expenses.length;
       expensesData = expenses;
+      const currentMonthExpenses = expenses.filter(exp => 
+        exp.expense_date && exp.expense_date >= startOfMonth && exp.expense_date <= endOfMonth
+      );
+      spent = currentMonthExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0);
+      expenseCount = currentMonthExpenses.length;
     }
   } catch (e) {
     console.error('Error fetching petty cash expenses:', e);
@@ -78,12 +105,22 @@ export default async function PettyCashDashboard() {
       
       <PettyCashSummaryCards summary={summary} />
 
-      <div className="glass rounded-2xl p-6 border border-border mt-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white">Expenses ({new Date().toLocaleString('default', { month: 'long' })})</h2>
-        </div>
-        
-        <ExpenseTable expensesData={expensesData} options={{ categories: categoriesResp.data || [], profiles: profilesResp.data || [], projects: projectsResp.data || [] }} />
+      <PettyCashBatchesSection 
+        initialBatches={batchesData} 
+        expensesData={expensesData} 
+      />
+
+      <div className="glass rounded-2xl p-6 border border-border mt-2">
+        <ExpenseTable 
+          expensesData={expensesData} 
+          batches={batchesData}
+          options={{ 
+            categories: categoriesResp.data || [], 
+            profiles: profilesResp.data || [], 
+            projects: projectsResp.data || [],
+            recurringDescriptions: recurringResp || []
+          }} 
+        />
       </div>
     </div>
   );

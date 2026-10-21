@@ -13,7 +13,6 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Menu,
   BarChart3
 } from 'lucide-react';
 import clsx from 'clsx';
@@ -48,6 +47,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
       { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
       { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, permission: `petty_cash_dashboard` },
       { name: 'Employee Settlement', href: '/settlement', icon: Users, permission: `petty_cash_expenses` },
+      { name: 'Resources (المصادر)', href: '/resources', icon: Settings, permission: `petty_cash_dashboard` },
       { name: 'Analysis', href: '/analysis', icon: BarChart3, permission: `petty_cash_dashboard` },
     ];
   } else {
@@ -84,23 +84,32 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
     )}>
       <div className={clsx("h-16 flex items-center border-b border-border relative transition-all duration-300", isCollapsed ? "justify-center px-0" : "px-6")}>
         {!isCollapsed && (
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent flex gap-2">
-            ECTRON Smart 
+          <div className="flex items-center gap-2">
+            {/* Ectron Brand Mark */}
+            <div className="flex items-baseline select-none tracking-tight">
+              <span className="text-2xl font-extrabold text-[#173B63] dark:text-blue-400">ectr</span>
+              <span className="relative inline-flex items-center justify-center mx-0.5">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#14B8A6] dark:bg-[#00a99d] inline-block" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#173B63] dark:bg-blue-400 absolute -top-2 -right-0.5" />
+              </span>
+              <span className="text-2xl font-extrabold text-[#173B63] dark:text-blue-400">n</span>
+            </div>
             {!isHome && !pathname.startsWith('/admin') && (
-              <span className="text-xs self-end mb-1 px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 capitalize">
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#CCFBF1] text-[#0F766E] border border-[#14B8A6]/30 dark:bg-[#00a99d]/15 dark:text-[#00a99d] dark:border-[#00a99d]/30 capitalize">
                 {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : division === 'petty-cash' ? 'Petty Cash' : 'M212'}
               </span>
             )}
-          </h1>
+          </div>
         )}
         {isCollapsed && (
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">
-            EC
-          </h1>
+          <div className="flex items-center justify-center select-none">
+            <span className="text-xl font-extrabold text-[#173B63] dark:text-blue-400">e</span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#14B8A6] dark:bg-[#00a99d] inline-block ml-0.5" />
+          </div>
         )}
         <button 
           onClick={() => setIsCollapsed?.(!isCollapsed)}
-          className="absolute -right-3 top-5 bg-zinc-800 border border-zinc-700 rounded-full p-1 text-zinc-400 hover:text-white hover:bg-zinc-700 z-50 transition-colors"
+          className="absolute -right-3 top-5 bg-white dark:bg-zinc-800 border border-[#E2E8F0] dark:border-zinc-700 rounded-full p-1 text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] dark:hover:text-white hover:bg-[#F0FDFA] dark:hover:bg-zinc-700 z-50 transition-colors shadow-sm"
         >
           {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
@@ -121,14 +130,17 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
               href={href}
               title={isCollapsed ? item.name : undefined}
               className={clsx(
-                'flex items-center rounded-lg text-sm font-medium transition-all duration-200',
-                isCollapsed ? 'justify-center w-12 h-12 mx-auto px-0' : 'gap-3 px-3 py-2.5',
+                'relative flex items-center rounded-xl text-sm font-medium transition-all duration-200',
+                isCollapsed ? 'justify-center w-12 h-12 mx-auto px-0' : 'gap-3 px-3.5 py-2.5',
                 isActive 
-                  ? 'bg-blue-500/10 text-blue-400' 
-                  : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50'
+                  ? 'bg-[#CCFBF1] text-[#0F766E] border border-[#14B8A6]/30 dark:bg-gradient-to-r dark:from-[#1b497f]/15 dark:to-[#00a99d]/15 dark:text-[#00a99d] dark:border-[#00a99d]/30 font-semibold shadow-sm' 
+                  : 'text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] dark:hover:text-zinc-100 hover:bg-[#F0FDFA] dark:hover:bg-zinc-800/50'
               )}
             >
-              <Icon className="w-5 h-5 flex-shrink-0" />
+              {isActive && (
+                <span className="dark:hidden absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#14B8A6]" />
+              )}
+              <Icon className={clsx("w-5 h-5 flex-shrink-0", isActive && "text-[#0F766E] dark:text-[#00a99d]")} />
               {!isCollapsed && <span className="truncate">{item.name}</span>}
             </Link>
           );
@@ -139,7 +151,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
         <button 
           title={isCollapsed ? "Settings" : undefined}
           className={clsx(
-            "flex items-center rounded-lg text-sm font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/50 transition-all duration-200",
+            "flex items-center rounded-lg text-sm font-medium text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] dark:hover:text-zinc-100 hover:bg-[#F0FDFA] dark:hover:bg-zinc-800/50 transition-all duration-200",
             isCollapsed ? "justify-center w-12 h-12 px-0" : "gap-3 px-3 py-2.5 w-full"
           )}
         >
@@ -150,7 +162,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
           onClick={handleLogout}
           title={isCollapsed ? "Logout" : undefined}
           className={clsx(
-            "flex items-center rounded-lg text-sm font-medium text-zinc-400 hover:text-danger hover:bg-danger/10 transition-all duration-200",
+            "flex items-center rounded-lg text-sm font-medium text-[#475569] dark:text-zinc-400 hover:text-danger hover:bg-danger/10 transition-all duration-200",
             isCollapsed ? "justify-center w-12 h-12 px-0" : "gap-3 px-3 py-2.5 w-full"
           )}
         >

@@ -19,7 +19,7 @@ export default function ClientLayoutShell({
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <Sidebar 
         userPermissions={userPermissions} 
         roleName={roleName} 
@@ -31,11 +31,11 @@ export default function ClientLayoutShell({
         isCollapsed ? "pl-20" : "pl-64"
       )}>
         <TopNav profile={profile} roleName={roleName} />
-        <main className="flex-1 p-6 relative">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-[100px] pointer-events-none" />
+        <main className="flex-1 p-6 relative overflow-x-hidden">
+          <div className="hidden dark:block absolute top-0 left-1/4 w-96 h-96 bg-[#1b497f]/10 rounded-full blur-[110px] pointer-events-none z-0" />
+          <div className="hidden dark:block absolute bottom-0 right-1/4 w-96 h-96 bg-[#00a99d]/10 rounded-full blur-[110px] pointer-events-none z-0" />
           
-          <div className="relative z-10">
+          <div>
             {children}
           </div>
         </main>

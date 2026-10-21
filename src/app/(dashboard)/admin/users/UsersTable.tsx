@@ -245,7 +245,7 @@ export default function UsersTable({ initialUsers, roles: initialRoles }: { init
           </button>
           <button 
             onClick={() => { setEditingUser(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg btn-primary-gradient bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
           >
             <UserPlus className="w-4 h-4" />
             Add User

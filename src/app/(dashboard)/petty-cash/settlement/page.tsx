@@ -52,10 +52,10 @@ export default async function EmployeeSettlement() {
         </div>
       </div>
 
-      <div className="glass rounded-2xl p-6 border border-border">
+      <div className="glass rounded-2xl p-6 border border-border dark:border-zinc-800/50">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-white">Settlement Overview</h2>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition-colors">
+          <button className="btn-primary-gradient bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-medium text-sm transition-colors shadow-lg shadow-blue-900/20">
             + New Reimbursement
           </button>
         </div>
@@ -82,13 +82,13 @@ export default async function EmployeeSettlement() {
                 settlementData.map((row) => (
                   <tr key={row.id} className="border-b border-zinc-800/50 hover:bg-zinc-800/20 transition-colors">
                     <td className="px-4 py-3 font-medium text-white">{row.name}</td>
-                    <td className="px-4 py-3 text-zinc-300">OMR {row.totalPaid.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-emerald-400">OMR {row.totalReimbursed.toFixed(2)}</td>
+                    <td className="px-4 py-3 text-zinc-300">OMR {row.totalPaid.toFixed(3)}</td>
+                    <td className="px-4 py-3 text-emerald-400">OMR {row.totalReimbursed.toFixed(3)}</td>
                     <td className="px-4 py-3 font-bold text-blue-400">
-                      {row.amountDue > 0 ? `OMR ${row.amountDue.toFixed(2)}` : '-'}
+                      {row.amountDue > 0 ? `OMR ${row.amountDue.toFixed(3)}` : '-'}
                     </td>
                     <td className="px-4 py-3 font-bold text-danger">
-                      {row.amountDue < 0 ? `OMR ${Math.abs(row.amountDue).toFixed(2)}` : '-'}
+                      {row.amountDue < 0 ? `OMR ${Math.abs(row.amountDue).toFixed(3)}` : '-'}
                     </td>
                   </tr>
                 ))

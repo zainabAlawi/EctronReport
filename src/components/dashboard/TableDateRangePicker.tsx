@@ -15,7 +15,6 @@ export default function TableDateRangePicker() {
   const [allowStartDateTyping, setAllowStartDateTyping] = useState(false);
   const [allowEndDateTyping, setAllowEndDateTyping] = useState(false);
 
-
   const updateUrl = (start: string, end: string, filter: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('startDate', start);

@@ -62,7 +62,7 @@ export default function RolesTable({ initialRoles, allPermissions }: { initialRo
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-lg btn-primary-gradient bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors disabled:opacity-50"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             حفظ التعديلات
