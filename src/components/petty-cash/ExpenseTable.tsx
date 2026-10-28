@@ -23,7 +23,8 @@ import {
   FileSpreadsheet,
   AlertCircle,
   Plus,
-  Upload
+  Upload,
+  FileText
 } from 'lucide-react';
 import clsx from 'clsx';
 import * as XLSX from 'xlsx';
@@ -650,6 +651,16 @@ export default function ExpenseTable({ expensesData, batches = [], options }: Ex
             <Upload className="w-4 h-4" />
             <span>رفع / استيراد Excel</span>
           </button>
+
+          <a
+            href="/Ectron_Petty_Cash_User_Guide.docx"
+            download="Ectron_Petty_Cash_User_Guide.docx"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 text-xs font-medium transition-colors border border-purple-500/30 cursor-pointer shadow-xs"
+            title="تحميل دليل المستخدم التنفيذي المعتمد بصيغة Word لإرساله للإدارة"
+          >
+            <FileText className="w-4 h-4 text-purple-400" />
+            <span>دليل Word للإدارة</span>
+          </a>
         </div>
       </div>
 

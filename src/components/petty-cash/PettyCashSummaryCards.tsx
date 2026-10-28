@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Target, CheckCircle2, TrendingUp, AlertCircle, Plus, FileSpreadsheet, Users, BarChart3, Settings2, Upload } from 'lucide-react';
+import { Target, CheckCircle2, TrendingUp, AlertCircle, Plus, FileSpreadsheet, Users, BarChart3, Settings2, Upload, FileText } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NewExpenseModal from './NewExpenseModal';
@@ -116,6 +116,16 @@ export default function PettyCashSummaryCards({ summary, batches = [], options }
           <Upload className="w-5 h-5 text-blue-500 dark:text-blue-400" />
           Import Excel (رفع ملف)
         </button>
+
+        <a 
+          href="/Ectron_Petty_Cash_User_Guide.docx"
+          download="Ectron_Petty_Cash_User_Guide.docx"
+          className="flex items-center gap-2 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 px-5 py-2.5 rounded-xl font-bold transition-colors border border-purple-500/30 cursor-pointer shadow-xs"
+          title="تحميل دليل المستخدم التنفيذي بصيغة Word للإدارة"
+        >
+          <FileText className="w-5 h-5 text-purple-500 dark:text-purple-400" />
+          <span>تحميل دليل المستخدم (Word)</span>
+        </a>
       </div>
 
       <NewExpenseModal 
