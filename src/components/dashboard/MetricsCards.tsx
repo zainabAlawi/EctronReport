@@ -66,12 +66,12 @@ interface MetricCardProps {
 
 function MetricCard({ title, value, icon: Icon, color, bg, glow = "" }: MetricCardProps) {
   return (
-    <div className={clsx("p-5 rounded-2xl glass border border-border flex items-center gap-4", glow)}>
-      <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center", bg)}>
+    <div className={clsx("p-5 rounded-2xl glass bg-gradient-to-br from-white to-[#F0F7FC] dark:bg-none border border-[#B5CDE2] border-l-4 border-l-[#14B8A6] dark:border-l dark:border-border flex items-center gap-4", glow)}>
+      <div className={clsx("w-12 h-12 rounded-xl flex items-center justify-center border border-[#173B63]/15 dark:border-transparent", bg)}>
         <Icon className={clsx("w-6 h-6", color)} />
       </div>
       <div>
-        <p className="text-zinc-400 text-sm font-medium">{title}</p>
+        <p className="text-zinc-400 text-sm font-semibold">{title}</p>
         <h3 className="text-2xl font-bold text-white mt-1">{value}</h3>
       </div>
     </div>

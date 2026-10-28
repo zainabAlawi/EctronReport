@@ -22,10 +22,12 @@ import {
   Layers,
   FileSpreadsheet,
   AlertCircle,
-  Plus
+  Plus,
+  Upload
 } from 'lucide-react';
 import clsx from 'clsx';
 import * as XLSX from 'xlsx';
+import ImportPettyCashModal from './ImportPettyCashModal';
 import { 
   updateExpense, 
   deleteExpenses, 
@@ -101,6 +103,7 @@ export default function ExpenseTable({ expensesData, batches = [], options }: Ex
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isBulkEditModalOpen, setIsBulkEditModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   // Action feedback
   const [loading, setLoading] = useState(false);
@@ -634,10 +637,18 @@ export default function ExpenseTable({ expensesData, batches = [], options }: Ex
 
           <button
             onClick={handleExportExcel}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-medium transition-colors border border-emerald-500/30"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-medium transition-colors border border-emerald-500/30 cursor-pointer shadow-xs"
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>تصدير Excel</span>
+          </button>
+
+          <button
+            onClick={() => setIsImportModalOpen(true)}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-medium transition-colors border border-blue-500/30 cursor-pointer shadow-xs"
+          >
+            <Upload className="w-4 h-4" />
+            <span>رفع / استيراد Excel</span>
           </button>
         </div>
       </div>
@@ -1451,6 +1462,21 @@ export default function ExpenseTable({ expensesData, batches = [], options }: Ex
           </div>
         </div>
       )}
+
+      {/* Excel / CSV Import Modal */}
+      <ImportPettyCashModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onSuccess={({ count, totalAmount }) => {
+          setToastMessage({
+            type: 'success',
+            text: `تم استيراد ${count} مصروف بنجاح بإجمالي OMR ${totalAmount.toFixed(3)}!`
+          });
+          router.refresh();
+        }}
+        batches={batches}
+        options={options}
+      />
     </div>
   );
 }

@@ -586,7 +586,7 @@ export default function PettyCashBatchesSection({
             return (
               <div
                 key={batch.id}
-                className="rounded-2xl border border-zinc-800 bg-zinc-950/60 p-5 flex flex-col gap-4 hover:border-[#14B8A6]/50 transition-all shadow-xs"
+                className="rounded-2xl border-2 border-[#B5CDE2] dark:border dark:border-zinc-800 bg-gradient-to-br from-[#F4F9FC] to-[#E6F4F1] dark:bg-none dark:bg-zinc-950/60 p-5 flex flex-col gap-4 hover:border-[#14B8A6] transition-all shadow-sm"
               >
                 {/* Top row: Status pill + Actions (Left) & Batch Title + Invoice Count (Right) */}
                 <div className="flex items-start justify-between gap-3">
@@ -598,12 +598,12 @@ export default function PettyCashBatchesSection({
                         handleStatusChange(batch, e.target.value as 'In Progress' | 'Ready' | 'Submitted')
                       }
                       className={clsx(
-                        'text-xs font-semibold px-3 py-1 rounded-full border cursor-pointer focus:outline-none transition-colors',
+                        'text-xs font-bold px-3 py-1 rounded-full border cursor-pointer focus:outline-none transition-colors',
                         batch.status === 'Ready'
-                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                          ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/40'
                           : batch.status === 'Submitted'
-                          ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
-                          : 'bg-zinc-800 text-zinc-300 border-zinc-700'
+                          ? 'bg-blue-500/15 text-blue-700 dark:text-blue-400 border-blue-500/40'
+                          : 'bg-[#173B63]/10 dark:bg-zinc-800 text-[#173B63] dark:text-zinc-300 border-[#173B63]/30 dark:border-zinc-700'
                       )}
                     >
                       <option value="In Progress" className="bg-zinc-900 text-zinc-200">
@@ -625,7 +625,7 @@ export default function PettyCashBatchesSection({
                         setSelectedToAssign([]);
                         setIsEditingMeta(false);
                       }}
-                      className="px-3 py-1 rounded-full text-xs font-semibold bg-[#14B8A6]/15 text-[#14B8A6] border border-[#14B8A6]/30 hover:bg-[#14B8A6]/25 transition-colors cursor-pointer"
+                      className="px-3 py-1 rounded-full text-xs font-bold bg-[#CCFBF1] dark:bg-[#14B8A6]/15 text-[#0F766E] dark:text-[#14B8A6] border border-[#14B8A6] dark:border-[#14B8A6]/30 hover:bg-[#99F6E4] dark:hover:bg-[#14B8A6]/25 transition-colors cursor-pointer"
                     >
                       إدارة الفواتير ({batchInvoices.length})
                     </button>
@@ -650,12 +650,12 @@ export default function PettyCashBatchesSection({
                     }}
                   >
                     <div className="flex items-center justify-end gap-2">
-                      <h3 className="text-base font-bold text-white group-hover:text-[#14B8A6] transition-colors">
+                      <h3 className="text-base font-bold text-[#173B63] dark:text-white group-hover:text-[#0F766E] dark:group-hover:text-[#14B8A6] transition-colors">
                         {batch.name}
                       </h3>
-                      <FolderOpen className="w-4 h-4 text-zinc-400 group-hover:text-[#14B8A6] transition-colors" />
+                      <FolderOpen className="w-4 h-4 text-[#0F766E] dark:text-zinc-400 group-hover:text-[#14B8A6] transition-colors" />
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-[#2B4C6F] dark:text-zinc-400 mt-0.5 font-medium">
                       Invoices {batchInvoices.length} • Attachments {attachmentsCount}
                     </p>
                   </div>
@@ -663,20 +663,20 @@ export default function PettyCashBatchesSection({
 
                 {/* Middle row: Amount & Total Amount label */}
                 <div className="flex items-baseline justify-between">
-                  <div className="text-lg font-bold text-white tracking-tight">
+                  <div className="text-lg font-extrabold text-[#173B63] dark:text-white tracking-tight">
                     OMR {totalAmount.toFixed(3)}
                   </div>
-                  <div className="text-xs text-zinc-400 flex items-center gap-2">
-                    <span className="font-mono text-[11px] text-zinc-500">{batch.id}</span>
+                  <div className="text-xs text-[#2B4C6F] dark:text-zinc-400 flex items-center gap-2 font-medium">
+                    <span className="font-mono text-[11px] text-[#4A6B8A] dark:text-zinc-500">{batch.id}</span>
                     <span>•</span>
                     <span>Total Amount</span>
                   </div>
                 </div>
 
                 {/* Progress Bar */}
-                <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-[#D2E3F0] dark:bg-zinc-800 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-[#0F766E] to-[#14B8A6] rounded-full transition-all duration-500"
+                    className="h-full bg-gradient-to-r from-[#173B63] via-[#0F766E] to-[#14B8A6] rounded-full transition-all duration-500"
                     style={{ width: `${progressPct}%` }}
                   />
                 </div>
@@ -686,12 +686,12 @@ export default function PettyCashBatchesSection({
                   <button
                     onClick={() => handleExportPdf(batch)}
                     disabled={busyAction !== null}
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 hover:border-[#14B8A6]/40 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#173B63] dark:border-zinc-800 bg-[#173B63] hover:bg-[#1E4B7A] dark:bg-zinc-900/70 dark:hover:bg-zinc-800 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {busyAction === `pdf-${batch.id}` ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-[#14B8A6]" />
+                      <Loader2 className="w-4 h-4 animate-spin text-[#2DD4BF]" />
                     ) : (
-                      <FileText className="w-4 h-4 text-[#14B8A6]" />
+                      <FileText className="w-4 h-4 text-[#2DD4BF] dark:text-[#14B8A6]" />
                     )}
                     <span>Merged PDF</span>
                   </button>
@@ -699,12 +699,12 @@ export default function PettyCashBatchesSection({
                   <button
                     onClick={() => handleExportExcel(batch)}
                     disabled={busyAction !== null}
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-zinc-800 bg-zinc-900/70 hover:bg-zinc-800 hover:border-[#14B8A6]/40 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#0F766E] dark:border-zinc-800 bg-[#0F766E] hover:bg-[#0D9488] dark:bg-zinc-900/70 dark:hover:bg-zinc-800 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                   >
                     {busyAction === `excel-${batch.id}` ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
                     ) : (
-                      <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+                      <FileSpreadsheet className="w-4 h-4 text-[#CCFBF1] dark:text-emerald-400" />
                     )}
                     <span>Accounts Report</span>
                   </button>
@@ -712,7 +712,7 @@ export default function PettyCashBatchesSection({
                   <button
                     onClick={() => handleExportZip(batch)}
                     disabled={busyAction !== null}
-                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#14B8A6]/30 bg-[#14B8A6]/10 hover:bg-[#14B8A6]/20 text-xs font-semibold text-[#14B8A6] transition-all cursor-pointer disabled:opacity-50"
+                    className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-[#14B8A6] dark:border-[#14B8A6]/30 bg-[#CCFBF1] hover:bg-[#99F6E4] dark:bg-[#14B8A6]/10 dark:hover:bg-[#14B8A6]/20 text-xs font-bold text-[#0F766E] dark:text-[#14B8A6] transition-all cursor-pointer disabled:opacity-50 shadow-xs"
                     title="تصدير تقرير الحسابات + ملف المرفقات المدمج معاً في ملف ZIP واحد"
                   >
                     {busyAction === `zip-${batch.id}` ? (

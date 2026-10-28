@@ -498,3 +498,250 @@ export async function bulkUpdateExpenses(
   }
 }
 
+export interface ImportExpenseInputRow {
+  expense_no?: string;
+  expense_date: string;
+  request_description: string;
+  category_name?: string;
+  employee_name?: string;
+  amount: number;
+  project_name?: string;
+}
+
+export interface ImportExpensesPayload {
+  rows: ImportExpenseInputRow[];
+  defaultEmployeeId?: string | null;
+  defaultCategoryId?: string | null;
+  autoCategorize?: boolean;
+  prefixMode?: 'monthly' | 'as_is';
+  targetBatchId?: string | null;
+}
+
+export async function importPettyCashExpenses(payload: ImportExpensesPayload) {
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { rows, defaultEmployeeId, defaultCategoryId, autoCategorize = true, prefixMode = 'monthly', targetBatchId } = payload;
+    if (!rows || rows.length === 0) {
+      return { error: 'No rows provided for import.' };
+    }
+
+    // 1. Fetch metadata
+    const [categoriesResp, profilesResp, projectsResp, existingExpensesResp] = await Promise.all([
+      supabase.from('petty_cash_categories').select('id, name'),
+      supabase.from('profiles').select('id, full_name, username'),
+      supabase.from('projects').select('id, name'),
+      supabase.from('petty_cash_expenses').select('expense_no')
+    ]);
+
+    const categories = categoriesResp.data || [];
+    const profiles = profilesResp.data || [];
+    const projects = projectsResp.data || [];
+    const existingExpenseNos = new Set((existingExpensesResp.data || []).map((e: any) => (e.expense_no || '').toLowerCase()));
+
+    const catMap = new Map<string, string>();
+    categories.forEach((c: any) => catMap.set(c.name.toLowerCase().trim(), c.id));
+
+    const profMap = new Map<string, string>();
+    profiles.forEach((p: any) => {
+      if (p.full_name) profMap.set(p.full_name.toLowerCase().trim(), p.id);
+      if (p.username) profMap.set(p.username.toLowerCase().trim(), p.id);
+    });
+
+    const projMap = new Map<string, string>();
+    projects.forEach((p: any) => projMap.set(p.name.toLowerCase().trim(), p.id));
+
+    // Fallback category
+    const defaultCatId = defaultCategoryId || catMap.get('other') || catMap.get('office supplies') || (categories[0]?.id ?? null);
+
+    // Keyword auto-categorizer
+    const smartCategorize = (desc: string): string => {
+      const d = (desc || '').toLowerCase();
+      if (d.includes('kitchen') || d.includes('beverage') || d.includes('water') || d.includes('coffee') || d.includes('tea') || d.includes('milk') || d.includes('refreshment')) {
+        return catMap.get('refreshments') || catMap.get('kitchen tools') || defaultCatId;
+      }
+      if (d.includes('lunch') || d.includes('dinner') || d.includes('snack') || d.includes('guest') || d.includes('hospitality') || d.includes('biscute') || d.includes('sweet')) {
+        return catMap.get('hospitality') || defaultCatId;
+      }
+      if (d.includes('cleaning') || d.includes('sewage') || d.includes('trash') || d.includes('waste')) {
+        return catMap.get('cleaning') || defaultCatId;
+      }
+      if (d.includes('transportation') || d.includes('van') || d.includes('taxi') || d.includes('custom')) {
+        return catMap.get('transportation') || defaultCatId;
+      }
+      if (d.includes('delever') || d.includes('delivery') || d.includes('courier') || d.includes('transformation charge')) {
+        return catMap.get('delivery services') || catMap.get('transportation') || defaultCatId;
+      }
+      if (d.includes('fuel') || d.includes('petrol') || d.includes('diesel')) {
+        return catMap.get('fuel') || defaultCatId;
+      }
+      if (d.includes('adapter') || d.includes('wire') || d.includes('optical reader') || d.includes('cabling') || d.includes('wifi') || d.includes('iron') || d.includes('screwdriver') || d.includes('electrical')) {
+        return catMap.get('electrical supplies') || catMap.get('it supplies') || catMap.get('small tools') || defaultCatId;
+      }
+      if (d.includes('mask') || d.includes('glove') || d.includes('safety') || d.includes('vest') || d.includes('shoe')) {
+        return catMap.get('safety items') || defaultCatId;
+      }
+      if (d.includes('troly') || d.includes('trolley') || d.includes('forklift') || d.includes('pallet') || d.includes('tape') || d.includes('rope')) {
+        return catMap.get('warehouse equipment') || defaultCatId;
+      }
+      if (d.includes('service') || d.includes('maintenance') || d.includes('repair') || d.includes('extinguisher')) {
+        return catMap.get('maintenance') || defaultCatId;
+      }
+      if (d.includes('stationery') || d.includes('barcode') || d.includes('paper') || d.includes('pen') || d.includes('file')) {
+        return catMap.get('stationery') || catMap.get('office supplies') || defaultCatId;
+      }
+      if (d.includes('labor') || d.includes('labour') || d.includes('worker')) {
+        return catMap.get('external labor') || defaultCatId;
+      }
+      return defaultCatId;
+    };
+
+    // Helper to resolve or create projects
+    const resolveProject = async (pName?: string): Promise<string | null> => {
+      if (!pName) return null;
+      const clean = pName.trim();
+      const lower = clean.toLowerCase();
+      if (projMap.has(lower)) return projMap.get(lower)!;
+
+      // Fuzzy checks
+      if (lower.includes('head office')) return projMap.get('head office') || null;
+      if (lower.includes('sagemcom three phase')) return projMap.get('sagemcom three phase') || projMap.get('sagemcom') || null;
+      if (lower.includes('sagemcom')) return projMap.get('sagemcom') || null;
+      if (lower.includes('tadoom 50% ectron 50%') || lower.includes('ectron 50% & tadoom 50%') || lower.includes('tadoom & ectron 50%')) {
+        return projMap.get('tadoom & ectron 50%') || projMap.get('ectron 50% & tadoom 50%') || null;
+      }
+      if (lower.includes('ect project')) return projMap.get('ect project') || null;
+      if (lower.includes('tadoom')) return projMap.get('tadoom') || null;
+      if (lower.includes('ectron')) return projMap.get('ectron') || null;
+
+      // Create new project
+      try {
+        const { data: newP } = await supabase.from('projects').insert([{ name: clean, active: true }]).select('id').single();
+        if (newP) {
+          projMap.set(lower, newP.id);
+          return newP.id;
+        }
+      } catch (e) {}
+      return null;
+    };
+
+    // 2. Prepare rows for insertion
+    const preparedInserts: any[] = [];
+    const usedNosInCurrentBatch = new Set<string>();
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const dateStr = (row.expense_date || '').trim();
+      const [y = '2026', m = '01'] = dateStr.split('-');
+
+      // Determine Category
+      let categoryId: string | null = null;
+      if (row.category_name && catMap.has(row.category_name.toLowerCase().trim())) {
+        categoryId = catMap.get(row.category_name.toLowerCase().trim())!;
+      } else if (autoCategorize) {
+        categoryId = smartCategorize(row.request_description);
+      } else {
+        categoryId = defaultCatId;
+      }
+
+      // Determine Employee
+      let employeeId: string | null = null;
+      if (row.employee_name && profMap.has(row.employee_name.toLowerCase().trim())) {
+        employeeId = profMap.get(row.employee_name.toLowerCase().trim())!;
+      } else if (defaultEmployeeId) {
+        employeeId = defaultEmployeeId;
+      }
+
+      // Determine Project
+      const projectId = await resolveProject(row.project_name);
+
+      // Determine Unique Expense No
+      let finalExpenseNo = '';
+      if (prefixMode === 'as_is' && row.expense_no) {
+        let candidate = row.expense_no.trim();
+        if (!existingExpenseNos.has(candidate.toLowerCase()) && !usedNosInCurrentBatch.has(candidate.toLowerCase())) {
+          finalExpenseNo = candidate;
+        }
+      }
+
+      if (!finalExpenseNo) {
+        // Generate PC-YYYY-MM-###
+        let seq = i + 1;
+        if (row.expense_no && /^\d+$/.test(row.expense_no.trim())) {
+          seq = parseInt(row.expense_no.trim(), 10);
+        }
+        let candidate = `PC-${y}-${m.padStart(2, '0')}-${seq.toString().padStart(3, '0')}`;
+        let retry = 0;
+        while (existingExpenseNos.has(candidate.toLowerCase()) || usedNosInCurrentBatch.has(candidate.toLowerCase())) {
+          retry++;
+          candidate = `PC-${y}-${m.padStart(2, '0')}-${(seq + retry).toString().padStart(3, '0')}`;
+        }
+        finalExpenseNo = candidate;
+      }
+
+      usedNosInCurrentBatch.add(finalExpenseNo.toLowerCase());
+
+      preparedInserts.push({
+        expense_no: finalExpenseNo,
+        expense_date: dateStr,
+        request_description: row.request_description || 'General Expense',
+        category_id: categoryId,
+        employee_id: employeeId,
+        project_id: projectId,
+        amount: Number(row.amount || 0),
+        created_by: user?.id,
+        updated_by: user?.id
+      });
+    }
+
+    // 3. Insert into Supabase
+    const { data: inserted, error: insertErr } = await supabase
+      .from('petty_cash_expenses')
+      .insert(preparedInserts)
+      .select('id, amount');
+
+    if (insertErr) {
+      console.error('Error inserting imported expenses:', insertErr);
+      return { error: insertErr.message || 'Failed to save imported expenses' };
+    }
+
+    const insertedIds = (inserted || []).map((x: any) => x.id);
+    const sumAmount = (inserted || []).reduce((acc: number, x: any) => acc + Number(x.amount || 0), 0);
+
+    // 4. Optionally assign to batch
+    if (targetBatchId && insertedIds.length > 0) {
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const batchesPath = path.join(process.cwd(), 'src', 'data', 'petty-cash-batches.json');
+        const content = await fs.readFile(batchesPath, 'utf-8');
+        const parsed = JSON.parse(content);
+        const batches: any[] = parsed.batches || [];
+        const batch = batches.find((b: any) => b.id === targetBatchId);
+        if (batch) {
+          const idSet = new Set(batch.invoiceIds || []);
+          insertedIds.forEach((id: string) => idSet.add(id));
+          batch.invoiceIds = Array.from(idSet);
+          await fs.writeFile(batchesPath, JSON.stringify({ batches }, null, 2), 'utf-8');
+        }
+      } catch (bErr) {
+        console.error('Error assigning imported expenses to batch:', bErr);
+      }
+    }
+
+    revalidatePath('/petty-cash/dashboard');
+    revalidatePath('/petty-cash/settlement');
+
+    return {
+      success: true,
+      count: insertedIds.length,
+      totalAmount: sumAmount
+    };
+  } catch (err: any) {
+    console.error('Unexpected error in importPettyCashExpenses:', err);
+    return { error: err.message || 'Failed to process import' };
+  }
+}
+
+

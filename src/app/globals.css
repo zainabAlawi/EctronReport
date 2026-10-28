@@ -30,32 +30,32 @@ html.dark {
 }
 
 html.light {
-  /* Enterprise SaaS Light Mode Palette */
-  --background: #F8FAFC;
-  --foreground: #475569;
+  /* Enterprise SaaS Light Mode Palette - Rich Navy & Turquoise Identity */
+  --background: #EBF2F7;
+  --foreground: #1E3A5F;
   --heading: #173B63;
   --card: #FFFFFF;
-  --card-foreground: #475569;
+  --card-foreground: #1E3A5F;
   --sidebar: #FFFFFF;
   --topnav: #FFFFFF;
   --primary-teal: #0F766E;
   --accent-turquoise: #14B8A6;
-  --border: #E2E8F0;
-  --hover-bg: #F0FDFA;
+  --border: #BDCEE0;
+  --hover-bg: #E0F7F4;
   --active-nav: #CCFBF1;
   --active-nav-text: #0F766E;
 
-  /* Harmonized Zinc scale mapping for Light Mode components */
-  --color-zinc-950: #F8FAFC;
-  --color-zinc-900: #FFFFFF;
-  --color-zinc-800: #F1F5F9;
-  --color-zinc-700: #E2E8F0;
-  --color-zinc-600: #CBD5E1;
-  --color-zinc-500: #64748B;
-  --color-zinc-400: #475569;
-  --color-zinc-300: #334155;
-  --color-zinc-200: #173B63;
-  --color-zinc-100: #173B63;
+  /* Harmonized Navy & Turquoise Zinc scale mapping for Light Mode widgets, buttons, and lists */
+  --color-zinc-950: #F0F6FA;
+  --color-zinc-900: #E3EEF6;
+  --color-zinc-800: #D2E3F0;
+  --color-zinc-700: #9BB8D3;
+  --color-zinc-600: #6B8EAD;
+  --color-zinc-500: #4A6B8A;
+  --color-zinc-400: #2B4C6F;
+  --color-zinc-300: #173B63;
+  --color-zinc-200: #123052;
+  --color-zinc-100: #0D233D;
 }
 
 body {
@@ -71,28 +71,66 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Clean White Card Surface in Light Mode */
+/* Clean White Card Surface with Navy/Turquoise Definition in Light Mode */
 html.light .glass {
   background: #FFFFFF;
   backdrop-filter: none;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.05);
+  border: 1.5px solid #C2D6E8;
+  box-shadow: 0 4px 16px -2px rgba(23, 59, 99, 0.08), 0 2px 6px -1px rgba(15, 118, 110, 0.06);
 }
 
-/* Modern Turquoise-to-Teal Gradient for Light Mode interactive highlights */
+/* Modern Navy-to-Turquoise Gradient for Light Mode interactive highlights */
 html.light .btn-primary-gradient {
-  background: linear-gradient(135deg, #14B8A6 0%, #0F766E 100%);
+  background: linear-gradient(135deg, #173B63 0%, #0F766E 55%, #14B8A6 100%);
   color: #FFFFFF !important;
-  box-shadow: 0 2px 8px -1px rgba(15, 118, 110, 0.3);
+  box-shadow: 0 3px 10px -1px rgba(23, 59, 99, 0.35);
+  border: 1px solid rgba(20, 184, 166, 0.4);
 }
 
 html.light .btn-primary-gradient:hover {
-  background: linear-gradient(135deg, #0D9488 0%, #115E59 100%);
-  box-shadow: 0 4px 12px -1px rgba(15, 118, 110, 0.4);
+  background: linear-gradient(135deg, #123052 0%, #0D9488 60%, #0F766E 100%);
+  box-shadow: 0 5px 14px -1px rgba(15, 118, 110, 0.45);
 }
 
 html.light .btn-primary-gradient * {
   color: #FFFFFF !important;
+}
+
+/* Distinct Inputs, Selects, and Textareas in Light Mode */
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+html.light select,
+html.light textarea {
+  background-color: #F0F6FA;
+  border-color: #9BB8D3;
+  color: #173B63;
+  font-weight: 500;
+}
+
+html.light input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+html.light select:focus,
+html.light textarea:focus {
+  background-color: #FFFFFF;
+  border-color: #14B8A6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.18);
+}
+
+/* Distinct Table Headers & Lists in Light Mode */
+html.light thead {
+  background: linear-gradient(90deg, #DCEAF5 0%, #CCFBF1 100%) !important;
+  border-bottom: 2px solid #14B8A6 !important;
+}
+
+html.light thead th {
+  color: #173B63 !important;
+  font-weight: 700 !important;
+}
+
+html.light tbody tr {
+  border-bottom-color: #D5E4F0 !important;
+}
+
+html.light tbody tr:nth-child(even) {
+  background-color: #F7FAFC;
 }
 
 /* Light Mode Typography & Surface Overrides:
@@ -118,6 +156,8 @@ html.light .bg-red-600,
 html.light .bg-\[\#0F766E\],
 html.light .bg-\[\#14B8A6\],
 html.light .bg-\[\#173B63\],
+html.light .bg-\[\#1E4B7A\],
+html.light .from-\[\#173B63\],
 html.light .from-\[\#14B8A6\],
 html.light .from-\[\#0F766E\],
 html.light .from-blue-600,
@@ -141,6 +181,8 @@ html.light .bg-red-600 *,
 html.light .bg-\[\#0F766E\] *,
 html.light .bg-\[\#14B8A6\] *,
 html.light .bg-\[\#173B63\] *,
+html.light .bg-\[\#1E4B7A\] *,
+html.light .from-\[\#173B63\] *,
 html.light .from-\[\#14B8A6\] *,
 html.light .from-\[\#0F766E\] *,
 html.light .from-blue-600 *,

@@ -103,7 +103,15 @@ export default async function PettyCashDashboard() {
         </div>
       </div>
       
-      <PettyCashSummaryCards summary={summary} />
+      <PettyCashSummaryCards 
+        summary={summary} 
+        batches={batchesData}
+        options={{ 
+          categories: categoriesResp.data || [], 
+          profiles: profilesResp.data || [], 
+          projects: projectsResp.data || []
+        }}
+      />
 
       <PettyCashBatchesSection 
         initialBatches={batchesData} 

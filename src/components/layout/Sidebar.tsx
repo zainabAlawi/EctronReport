@@ -13,7 +13,11 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  BarChart3
+  BarChart3,
+  UserPlus,
+  ListFilter,
+  QrCode,
+  FileSpreadsheet
 } from 'lucide-react';
 import clsx from 'clsx';
 import { createClient } from '@/lib/supabase';
@@ -31,7 +35,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
   
   // Extract division from pathname (e.g. /water/dashboard -> water)
   const parts = pathname.split('/');
-  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity' || parts[1] === 'electricity-ecs1100' || parts[1] === 'petty-cash') ? parts[1] : 'electricity'; 
+  const division = parts[1] && (parts[1] === 'water' || parts[1] === 'electricity' || parts[1] === 'electricity-ecs1100' || parts[1] === 'petty-cash' || parts[1] === 'visits' || parts[1] === 'visitor') ? parts[1] : 'electricity'; 
 
   const hasPermission = (key: string) => {
     if (roleName === 'Admin') return true;
@@ -50,6 +54,15 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
       { name: 'Resources (المصادر)', href: '/resources', icon: Settings, permission: `petty_cash_dashboard` },
       { name: 'Analysis', href: '/analysis', icon: BarChart3, permission: `petty_cash_dashboard` },
     ];
+  } else if (division === 'visits' || division === 'visitor') {
+    navItems = [
+      { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
+      { name: 'Visitor Dashboard', href: '/visitor/dashboard', icon: LayoutDashboard, showAlways: true },
+      { name: 'Register New Visit', href: '/visitor/new', icon: UserPlus, showAlways: true },
+      { name: 'Visits List', href: '/visitor/list', icon: ListFilter, showAlways: true },
+      { name: 'QR Code', href: '/visitor/qrcode', icon: QrCode, showAlways: true },
+      { name: 'Import Excel', href: '/visitor/import', icon: FileSpreadsheet, showAlways: true },
+    ];
   } else {
     navItems = [
       { name: 'Home (الرئيسية)', href: '/home', icon: Home, showAlways: true },
@@ -66,7 +79,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
   }
 
   const getHref = (baseHref: string) => {
-    if (baseHref.startsWith('/admin') || baseHref === '/home') return baseHref;
+    if (baseHref.startsWith('/admin') || baseHref === '/home' || baseHref.startsWith('/visits') || baseHref.startsWith('/visitor')) return baseHref;
     return division ? `/${division}${baseHref}` : baseHref;
   };
 
@@ -96,7 +109,7 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
             </div>
             {!isHome && !pathname.startsWith('/admin') && (
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#CCFBF1] text-[#0F766E] border border-[#14B8A6]/30 dark:bg-[#00a99d]/15 dark:text-[#00a99d] dark:border-[#00a99d]/30 capitalize">
-                {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : division === 'petty-cash' ? 'Petty Cash' : 'M212'}
+                {division === 'water' ? 'Siconia' : division === 'electricity-ecs1100' ? 'ECS1100' : division === 'petty-cash' ? 'Petty Cash' : (division === 'visits' || division === 'visitor') ? 'Visitor Mgmt' : 'M212'}
               </span>
             )}
           </div>
@@ -133,15 +146,15 @@ export default function Sidebar({ userPermissions = [], roleName = '', isCollaps
                 'relative flex items-center rounded-xl text-sm font-medium transition-all duration-200',
                 isCollapsed ? 'justify-center w-12 h-12 mx-auto px-0' : 'gap-3 px-3.5 py-2.5',
                 isActive 
-                  ? 'bg-[#CCFBF1] text-[#0F766E] border border-[#14B8A6]/30 dark:bg-gradient-to-r dark:from-[#1b497f]/15 dark:to-[#00a99d]/15 dark:text-[#00a99d] dark:border-[#00a99d]/30 font-semibold shadow-sm' 
-                  : 'text-[#475569] dark:text-zinc-400 hover:text-[#0F766E] dark:hover:text-zinc-100 hover:bg-[#F0FDFA] dark:hover:bg-zinc-800/50'
+                  ? 'bg-gradient-to-r from-[#173B63] to-[#0F766E] text-white border border-[#14B8A6]/40 dark:from-[#1b497f]/15 dark:to-[#00a99d]/15 dark:text-[#00a99d] dark:border-[#00a99d]/30 font-semibold shadow-sm' 
+                  : 'bg-[#F0F6FA] dark:bg-transparent border border-[#D2E3F0] dark:border-transparent text-[#173B63] dark:text-zinc-400 hover:text-[#0F766E] dark:hover:text-zinc-100 hover:bg-[#CCFBF1]/60 hover:border-[#14B8A6] dark:hover:bg-zinc-800/50'
               )}
             >
               {isActive && (
-                <span className="dark:hidden absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#14B8A6]" />
+                <span className="dark:hidden absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#2DD4BF]" />
               )}
-              <Icon className={clsx("w-5 h-5 flex-shrink-0", isActive && "text-[#0F766E] dark:text-[#00a99d]")} />
-              {!isCollapsed && <span className="truncate">{item.name}</span>}
+              <Icon className={clsx("w-5 h-5 flex-shrink-0", isActive ? "text-[#2DD4BF] dark:text-[#00a99d]" : "text-[#0F766E] dark:text-zinc-400")} />
+              {!isCollapsed && <span className={clsx("truncate", isActive && "text-white dark:text-[#00a99d]")}>{item.name}</span>}
             </Link>
           );
         })}

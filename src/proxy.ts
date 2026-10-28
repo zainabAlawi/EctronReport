@@ -32,12 +32,16 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const isAuthRoute = request.nextUrl.pathname === '/';
+  const isPublicVisitorRoute = 
+    request.nextUrl.pathname === '/visitor/register' || 
+    request.nextUrl.pathname === '/visitor/thank-you';
   
-  // Exclude static assets and api endpoints that shouldn't be protected by UI redirects
+  // Exclude static assets, api endpoints, and public visitor registration from auth redirect
   if (
     request.nextUrl.pathname.startsWith('/_next') ||
     request.nextUrl.pathname.includes('.') || 
-    request.nextUrl.pathname.startsWith('/api') // Note: APIs should do their own auth checks
+    request.nextUrl.pathname.startsWith('/api') ||
+    isPublicVisitorRoute
   ) {
     return supabaseResponse;
   }

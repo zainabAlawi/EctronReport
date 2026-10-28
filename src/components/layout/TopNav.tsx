@@ -32,6 +32,7 @@ export default function TopNav({ profile, roleName }: TopNavProps) {
   else if (section === 'electricity') sectionTitle = 'الكهرباء (Electricity M212)';
   else if (section === 'electricity-ecs1100') sectionTitle = 'الكهرباء (Electricity ECS1100)';
   else if (section === 'petty-cash') sectionTitle = 'إدارة النقديات (Petty Cash)';
+  else if (section === 'visits' || section === 'visitor') sectionTitle = 'إدارة الزوار (Visitor Management)';
   else if (section === 'admin') sectionTitle = 'لوحة الإدارة (Admin Panel)';
   else if (section === 'home') sectionTitle = 'الرئيسية (Home)';
 
